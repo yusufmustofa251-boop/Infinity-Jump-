@@ -1,0 +1,34 @@
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- GUI
+local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+local button = Instance.new("TextButton", screenGui)
+
+button.Size = UDim2.new(0, 150, 0, 50)
+button.Position = UDim2.new(0, 20, 0, 100)
+button.Text = "Infinite Jump: OFF"
+button.BackgroundColor3 = Color3.fromRGB(50,50,50)
+button.TextColor3 = Color3.new(1,1,1)
+
+-- Status
+local enabled = false
+
+button.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    if enabled then
+        button.Text = "Infinite Jump: ON"
+    else
+        button.Text = "Infinite Jump: OFF"
+    end
+end)
+
+-- Infinite Jump Logic
+UIS.JumpRequest:Connect(function()
+    if enabled then
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
