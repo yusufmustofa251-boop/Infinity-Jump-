@@ -1,0 +1,130 @@
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+local frame = Instance.new("Frame", gui)
+
+frame.Size = UDim2.new(0,200,0,250)
+frame.Position = UDim2.new(0,50,0,100)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.Active = true
+frame.Draggable = true
+
+-- BUTTON FUNCTION
+local function createBtn(text, y)
+    local b = Instance.new("TextButton", frame)
+    b.Size = UDim2.new(1,-20,0,40)
+    b.Position = UDim2.new(0,10,0,y)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    b.TextColor3 = Color3.new(1,1,1)
+    return b
+end
+
+-- BUTTONS
+local flyBtn = createBtn("Fly: OFF",10)
+local invisBtn = createBtn("Invisible: OFF",60)
+local speedBtn = createBtn("Speed: OFF",110)
+local jumpBtn = createBtn("Inf Jump: OFF",160)
+
+-- STATES
+local fly, invis, speed, infJump = false,false,false,false
+
+local bodyVel, bodyGyro
+
+local function getChar()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+-- 🦸 FLY
+flyBtn.MouseButton1Click:Connect(function()
+    fly = not fly
+    flyBtn.Text = "Fly: "..(fly and "ON" or "OFF")
+
+    local char = getChar()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    if fly then
+        bodyVel = Instance.new("BodyVelocity", hrp)
+        bodyVel.MaxForce = Vector3.new(1e5,1e5,1e5)
+
+        bodyGyro = Instance.new("BodyGyro", hrp)
+        bodyGyro.MaxTorque = Vector3.new(1e5,1e5,1e5)
+    else
+        if bodyVel then bodyVel:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
+    end
+end)
+
+-- 👻 INVISIBLE
+invisBtn.MouseButton1Click:Connect(function()
+    invis = not invis
+    invisBtn.Text = "Invisible: "..(invis and "ON" or "OFF")
+
+    local char = getChar()
+
+    for _,v in pairs(char:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Transparency = invis and 1 or 0
+        end
+    end
+end)
+
+-- ⚡ SPEED
+speedBtn.MouseButton1Click:Connect(function()
+    speed = not speed
+    speedBtn.Text = "Speed: "..(speed and "ON" or "OFF")
+
+    local hum = getChar():FindFirstChild("Humanoid")
+    if hum then
+        hum.WalkSpeed = speed and 50 or 16
+    end
+end)
+
+-- 🚀 INFINITE JUMP
+jumpBtn.MouseButton1Click:Connect(function()
+    infJump = not infJump
+    jumpBtn.Text = "Inf Jump: "..(infJump and "ON" or "OFF")
+end)
+
+UIS.JumpRequest:Connect(function()
+    if infJump then
+        local hum = getChar():FindFirstChild("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- FLY CONTROL
+RunService.RenderStepped:Connect(function()
+    if fly and bodyVel and bodyGyro then
+        local char = getChar()
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+
+        local moveDir = Vector3.new(0,0,0)
+
+        if UIS:IsKeyDown(Enum.KeyCode.W) then
+            moveDir += cam.CFrame.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then
+            moveDir -= cam.CFrame.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then
+            moveDir -= cam.CFrame.RightVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then
+            moveDir += cam.CFrame.RightVector
+        end
+
+        bodyVel.Velocity = moveDir * 60
+
+        if moveDir.Magnitude > 0 then
+            bodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + moveDir)
+                * CFrame.Angles(math.rad(-90),0,0)
+        end
+    end
+end)
