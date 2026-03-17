@@ -1,0 +1,234 @@
+-- QUANTUM ONYX FINAL FORM 100% ALL-IN-ONE
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local function getChar()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "QuantumOnyxFinalForm"
+
+-- OPEN/CLOSE UI
+local toggleBtn = Instance.new("TextButton", gui)
+toggleBtn.Size = UDim2.new(0,120,0,40)
+toggleBtn.Position = UDim2.new(0,20,0,50)
+toggleBtn.Text = "CLOSE UI"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,280,0,450)
+frame.Position = UDim2.new(0,20,0,100)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.Active = true
+frame.Draggable = true
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,40)
+title.Text = "⚡ Quantum Onyx Toggle"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+
+-- UI toggle
+local uiOpen = true
+toggleBtn.MouseButton1Click:Connect(function()
+    uiOpen = not uiOpen
+    frame.Visible = uiOpen
+    toggleBtn.Text = uiOpen and "CLOSE UI" or "OPEN UI"
+end)
+
+-- DELTA-STYLE TOGGLE FUNCTION
+local function makeToggle(text, y)
+    local holder = Instance.new("Frame", frame)
+    holder.Size = UDim2.new(1,-20,0,40)
+    holder.Position = UDim2.new(0,10,0,y)
+    holder.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", holder)
+    label.Size = UDim2.new(0.6,0,1,0)
+    label.Text = text
+    label.TextColor3 = Color3.new(1,1,1)
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextScaled = true
+
+    local toggle = Instance.new("Frame", holder)
+    toggle.Size = UDim2.new(0,50,0,25)
+    toggle.Position = UDim2.new(1,-60,0.5,-12)
+    toggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+
+    local circle = Instance.new("Frame", toggle)
+    circle.Size = UDim2.new(0,20,0,20)
+    circle.Position = UDim2.new(0,3,0.5,-10)
+    circle.BackgroundColor3 = Color3.fromRGB(200,200,200)
+
+    local state = false
+
+    local function setToggle(on)
+        state = on
+        local goalPos = on and UDim2.new(1,-23,0.5,-10) or UDim2.new(0,3,0.5,-10)
+        local goalColor = on and Color3.fromRGB(0,170,255) or Color3.fromRGB(200,200,200)
+
+        TweenService:Create(circle, TweenInfo.new(0.2), {Position = goalPos, BackgroundColor3 = goalColor}):Play()
+        toggle.BackgroundColor3 = on and Color3.fromRGB(0,80,120) or Color3.fromRGB(60,60,60)
+    end
+
+    holder.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            setToggle(not state)
+        end
+    end)
+
+    return {
+        Set = setToggle,
+        Get = function() return state end
+    }
+end
+
+-- TOGGLES
+local flyToggle = makeToggle("Fly",50)
+local invisToggle = makeToggle("Invisible",100)
+local jumpToggle = makeToggle("Infinite Jump",150)
+local godToggle = makeToggle("GOD MODE",200)
+
+-- UP/DOWN BUTTONS
+local upBtn = Instance.new("TextButton", frame)
+upBtn.Size = UDim2.new(0.4,0,0,35)
+upBtn.Position = UDim2.new(0.05,0,0,260)
+upBtn.Text = "⬆️"
+upBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+local downBtn = Instance.new("TextButton", frame)
+downBtn.Size = UDim2.new(0.4,0,0,35)
+downBtn.Position = UDim2.new(0.55,0,0,260)
+downBtn.Text = "⬇️"
+downBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+-- SPEED
+local speedBtn = Instance.new("TextButton", frame)
+speedBtn.Size = UDim2.new(1,-20,0,35)
+speedBtn.Position = UDim2.new(0,10,0,310)
+speedBtn.Text = "Speed: 60"
+speedBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+-- STATE VARIABLES
+local fly, invis, infJump, god = false,false,false,false
+local flySpeed = 60
+local goingUp, goingDown = false,false
+local bodyVel, bodyGyro
+
+-- UP/DOWN LOGIC
+upBtn.MouseButton1Down:Connect(function() goingUp = true end)
+upBtn.MouseButton1Up:Connect(function() goingUp = false end)
+downBtn.MouseButton1Down:Connect(function() goingDown = true end)
+downBtn.MouseButton1Up:Connect(function() goingDown = false end)
+
+-- SPEED LOGIC
+speedBtn.MouseButton1Click:Connect(function()
+    flySpeed += 20
+    if flySpeed > 200 then flySpeed = 40 end
+    speedBtn.Text = "Speed: "..flySpeed
+end)
+
+-- MAIN LOOP
+RunService.RenderStepped:Connect(function()
+    fly = flyToggle.Get()
+    invis = invisToggle.Get()
+    infJump = jumpToggle.Get()
+    god = godToggle.Get()
+
+    local char = getChar()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local cam = workspace.CurrentCamera
+
+    -- GOD MODE
+    if god then
+        flyToggle.Set(true)
+        invisToggle.Set(true)
+        jumpToggle.Set(true)
+    end
+
+    -- FLY SYSTEM
+    if fly then
+        hum.PlatformStand = true
+        if not bodyVel then
+            bodyVel = Instance.new("BodyVelocity", hrp)
+            bodyVel.MaxForce = Vector3.new(1e5,1e5,1e5)
+
+            bodyGyro = Instance.new("BodyGyro", hrp)
+            bodyGyro.MaxTorque = Vector3.new(1e5,1e5,1e5)
+        end
+
+        local moveDir = hum.MoveDirection
+        local dir = (cam.CFrame.LookVector * moveDir.Z + cam.CFrame.RightVector * moveDir.X)
+        if goingUp then dir += Vector3.new(0,1,0) end
+        if goingDown then dir -= Vector3.new(0,1,0) end
+        if dir.Magnitude > 0 then dir = dir.Unit end
+
+        bodyVel.Velocity = dir * flySpeed
+        bodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + cam.CFrame.LookVector)
+    else
+        hum.PlatformStand = false
+        if bodyVel then bodyVel:Destroy() bodyVel=nil end
+        if bodyGyro then bodyGyro:Destroy() bodyGyro=nil end
+    end
+
+    -- INVISIBLE
+    for _,v in ipairs(char:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Transparency = invis and 1 or 0
+        end
+    end
+end)
+
+-- INFINITE JUMP
+UIS.JumpRequest:Connect(function()
+    if jumpToggle.Get() then
+        local hum = getChar():FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- 🌈 RGB EFFECT
+local hue = 0
+RunService.RenderStepped:Connect(function()
+    hue += 0.003
+    if hue > 1 then hue = 0 end
+    title.TextColor3 = Color3.fromHSV(hue,1,1)
+end)
+
+-- ✨ SUPER POWER VISUALS
+RunService.RenderStepped:Connect(function()
+    local char = getChar()
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if fly then
+        if not hrp:FindFirstChild("Trail") then
+            local trail = Instance.new("Trail", hrp)
+            trail.Name = "Trail"
+            trail.Color = ColorSequence.new(Color3.fromRGB(0,170,255))
+            trail.Attachment0 = Instance.new("Attachment", hrp)
+            trail.Attachment1 = Instance.new("Attachment", hrp)
+        end
+        -- glowing eyes
+        for _,v in ipairs(char:GetDescendants()) do
+            if v:IsA("MeshPart") and v.Name:lower():find("head") then
+                if not v:FindFirstChild("Glow") then
+                    local glow = Instance.new("PointLight", v)
+                    glow.Name = "Glow"
+                    glow.Color = Color3.fromRGB(0,170,255)
+                    glow.Brightness = 5
+                    glow.Range = 10
+                end
+            end
+        end
+    end
+end)
