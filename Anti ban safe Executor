@@ -1,0 +1,263 @@
+local player = game.Players.LocalPlayer
+
+-- ===============================
+-- STATES SYSTEM (AUTO REAPPLY)
+-- ===============================
+local states = {
+    speed = false,
+    jump = false,
+    invisible = false,
+    antifling = false
+}
+
+local function applyStates()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+
+    if hum then
+        if states.speed then hum.WalkSpeed = 80 end
+        if states.jump then hum.JumpPower = 100 end
+    end
+
+    if states.invisible then
+        for _,v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then v.Transparency = 0.7 end
+        end
+    end
+
+    if states.antifling then
+        for _,v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                v.AssemblyAngularVelocity = Vector3.new(0,0,0)
+            end
+        end
+    end
+end
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    applyStates()
+end)
+
+-- ===============================
+-- GUI SETUP
+-- ===============================
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,400,0,250)
+frame.Position = UDim2.new(0.5,-200,0.5,-125)
+frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0.15,0)
+title.Text = "ONYX IMMORTAL FX 👑"
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255,0,80)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+
+-- ===============================
+-- BUTTON CREATOR (MODERN STYLE)
+-- ===============================
+local function createButton(parent,text,posY,callback)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(0.8,0,0.12,0)
+    b.Position = UDim2.new(0.1,0,posY,0)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 14
+
+    -- ROUND
+    local corner = Instance.new("UICorner", b)
+    corner.CornerRadius = UDim.new(0,12)
+
+    -- GLOW STROKE
+    local stroke = Instance.new("UIStroke", b)
+    stroke.Color = Color3.fromRGB(255,0,80)
+    stroke.Thickness = 1.5
+
+    -- HOVER EFFECT
+    b.MouseEnter:Connect(function()
+        b:TweenSize(UDim2.new(0.82,0,0.13,0),"Out","Quad",0.1,true)
+        stroke.Color = Color3.fromRGB(255,80,120)
+    end)
+    b.MouseLeave:Connect(function()
+        b:TweenSize(UDim2.new(0.8,0,0.12,0),"Out","Quad",0.1,true)
+        stroke.Color = Color3.fromRGB(255,0,80)
+    end)
+
+    b.MouseButton1Click:Connect(callback)
+    return b
+end
+
+-- ===============================
+-- PLAYER MENU
+-- ===============================
+createButton(frame,"Speed ⚡",0,function()
+    states.speed = not states.speed
+    applyStates()
+end)
+createButton(frame,"Jump 🦘",0.15,function()
+    states.jump = not states.jump
+    applyStates()
+end)
+createButton(frame,"Invisible 👻",0.3,function()
+    states.invisible = not states.invisible
+    applyStates()
+end)
+createButton(frame,"Anti Fling 🛡️",0.45,function()
+    states.antifling = not states.antifling
+    applyStates()
+end)
+createButton(frame,"Reset 🔄",0.6,function()
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+    if hum then hum.Health = 0 end
+end)
+
+-- ===============================
+-- TELEPORT FEATURE
+-- ===============================
+local savedPos
+local function playTeleportSound()
+    local s = Instance.new("Sound")
+    s.SoundId = "rbxassetid://9118823102"
+    s.Volume = 2
+    s.Parent = workspace
+    s:Play()
+    game.Debris:AddItem(s,3)
+end
+
+local function teleportEffect(char)
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(2,2,2)
+    part.Shape = Enum.PartType.Ball
+    part.Material = Enum.Material.Neon
+    part.Color = Color3.fromRGB(255,0,80)
+    part.Anchored = true
+    part.CanCollide = false
+    part.CFrame = root.CFrame
+    part.Parent = workspace
+
+    local light = Instance.new("PointLight", part)
+    light.Brightness = 10
+    light.Range = 15
+    light.Color = Color3.fromRGB(255,0,120)
+
+    part:TweenSize(Vector3.new(10,10,10),"Out","Quad",0.3,true)
+
+    local flash = Instance.new("ColorCorrectionEffect", game.Lighting)
+    flash.TintColor = Color3.fromRGB(255,150,150)
+    flash.Brightness = 0.5
+
+    task.delay(0.6,function()
+        flash:Destroy()
+        part:Destroy()
+    end)
+end
+
+local function notify(msg)
+    local hint = Instance.new("Hint")
+    hint.Text = msg
+    hint.Parent = workspace
+    game.Debris:AddItem(hint,2)
+end
+
+createButton(frame,"Save Position 📍",0.75,function()
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if root then savedPos = root.CFrame end
+end)
+
+createButton(frame,"Teleport ⚡",0.87,function()
+    local char = player.Character
+    if savedPos and char then
+        char:PivotTo(savedPos)
+        playTeleportSound()
+        teleportEffect(char)
+        notify("Teleport Owner Has Active")
+    end
+end)
+
+-- ===============================
+-- EXECUTOR + HISTORY + SAVE
+-- ===============================
+local history, savedScripts = {}, {}
+
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(0.9,0,0.15,0)
+box.Position = UDim2.new(0.05,0,0.02,0)
+box.PlaceholderText = "Script / URL"
+box.ClearTextOnFocus = false
+box.TextXAlignment = Enum.TextXAlignment.Left
+box.TextYAlignment = Enum.TextYAlignment.Top
+box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+box.TextColor3 = Color3.fromRGB(200,200,200)
+Instance.new("UICorner", box)
+
+local function log(msg)
+    local console = frame:FindFirstChild("Console")
+    if not console then
+        console = Instance.new("TextLabel", frame)
+        console.Name = "Console"
+        console.Size = UDim2.new(0.9,0,0.15,0)
+        console.Position = UDim2.new(0.05,0,0.5,0)
+        console.Text = ""
+        console.TextColor3 = Color3.fromRGB(0,255,150)
+        console.TextXAlignment = Enum.TextXAlignment.Left
+        console.TextYAlignment = Enum.TextYAlignment.Top
+        console.BackgroundTransparency = 1
+    end
+    console.Text = console.Text.."\n"..msg
+end
+
+createButton(frame,"EXECUTE",0.32,function()
+    local code = box.Text
+    table.insert(history, code)
+    local success, err = pcall(function() loadstring(code)() end)
+    if success then log("SUCCESS ✅") else log("ERROR ❌ "..err) end
+end)
+
+createButton(frame,"SAVE 💾",0.44,function()
+    table.insert(savedScripts, box.Text)
+    log("Saved #"..#savedScripts)
+end)
+
+createButton(frame,"HISTORY 📜",0.56,function()
+    log("[ HISTORY ]")
+    for i,v in pairs(history) do
+        log("Script "..i..": "..v)
+    end
+end)
+
+createButton(frame,"SAVED 📂",0.68,function()
+    log("[ SAVED ]")
+    for i,v in pairs(savedScripts) do
+        log("Saved "..i..": "..v)
+    end
+end)
+
+-- ===============================
+-- TOGGLE UI BUTTON
+-- ===============================
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0,100,0,40)
+toggle.Position = UDim2.new(0,10,0,10)
+toggle.Text = "ONYX"
+toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+toggle.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", toggle)
+
+local visible = true
+toggle.MouseButton1Click:Connect(function()
+    visible = not visible
+    frame.Visible = visible
+end)
