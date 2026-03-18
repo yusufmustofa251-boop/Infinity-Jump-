@@ -1,0 +1,281 @@
+local player = game.Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+-- MAIN FRAME
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,430,0,300)
+frame.Position = UDim2.new(0.5,-215,0.5,-150)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- GLOW BORDER
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(255,0,80)
+stroke.Thickness = 2
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0.1,0)
+title.Text = "ONYX FULL SYSTEM 👑"
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1,1,1)
+
+-- VIP TEXT
+local vipText = Instance.new("TextLabel", frame)
+vipText.Size = UDim2.new(0.4,0,0.08,0)
+vipText.Position = UDim2.new(0.3,0,0.1,0)
+vipText.Text = "VIP LOGIN"
+vipText.TextColor3 = Color3.fromRGB(150,150,150)
+vipText.BackgroundTransparency = 1
+
+-- CONTAINER
+local container = Instance.new("Frame", frame)
+container.Size = UDim2.new(1,0,0.82,0)
+container.Position = UDim2.new(0,0,0.18,0)
+container.BackgroundTransparency = 1
+
+local function clear()
+    for _,v in pairs(container:GetChildren()) do v:Destroy() end
+end
+
+-- ================= FREE =================
+local function loadFree()
+    clear()
+
+    local function btn(text,y,func)
+        local b = Instance.new("TextButton", container)
+        b.Size = UDim2.new(0.8,0,0.18,0)
+        b.Position = UDim2.new(0.1,0,y,0)
+        b.Text = text
+        b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        b.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(func)
+    end
+
+    btn("Speed ⚡",0,function()
+        local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = 60 end
+    end)
+
+    btn("Invisible 👻",0.25,function()
+        local char = player.Character
+        if char then
+            for _,v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.Transparency = 0.6
+                end
+            end
+        end
+    end)
+
+    btn("GO VIP 👑",0.5,function()
+        loadLogin()
+    end)
+end
+
+-- ================= LOGIN =================
+function loadLogin()
+    clear()
+
+    local box = Instance.new("TextBox", container)
+    box.Size = UDim2.new(0.6,0,0.2,0)
+    box.Position = UDim2.new(0.2,0,0.3,0)
+    box.PlaceholderText = "Enter Key..."
+    Instance.new("UICorner", box)
+
+    local btn = Instance.new("TextButton", container)
+    btn.Size = UDim2.new(0.4,0,0.2,0)
+    btn.Position = UDim2.new(0.3,0,0.6,0)
+    btn.Text = "LOGIN"
+    btn.BackgroundColor3 = Color3.fromRGB(120,30,30)
+
+    btn.MouseButton1Click:Connect(function()
+        if box.Text == "VIPONLY" then
+            loadVIP()
+        else
+            btn.Text = "WRONG ❌"
+        end
+    end)
+end
+
+-- ================= VIP =================
+function loadVIP()
+    clear()
+
+    local vipFrame = Instance.new("Frame", container)
+    vipFrame.Size = UDim2.new(0.95,0,0.95,0)
+    vipFrame.Position = UDim2.new(0.025,0,0.02,0)
+    vipFrame.BackgroundColor3 = Color3.fromRGB(25,5,5)
+    vipFrame.BackgroundTransparency = 0.1
+    Instance.new("UICorner", vipFrame)
+
+    -- LABEL
+    local label = Instance.new("TextLabel", vipFrame)
+    label.Size = UDim2.new(1,0,0.08,0)
+    label.Text = "✔ Executor Safe - Loadstring Enabled"
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(0,255,150)
+
+    -- MENU
+    local menu = Instance.new("Frame", vipFrame)
+    menu.Size = UDim2.new(0.28,0,0.92,0)
+    menu.Position = UDim2.new(0,0,0.08,0)
+    menu.BackgroundColor3 = Color3.fromRGB(50,15,15)
+    Instance.new("UICorner", menu)
+
+    -- CONTENT
+    local content = Instance.new("Frame", vipFrame)
+    content.Size = UDim2.new(0.72,0,0.92,0)
+    content.Position = UDim2.new(0.28,0,0.08,0)
+    content.BackgroundTransparency = 1
+
+    local function clearContent()
+        for _,v in pairs(content:GetChildren()) do v:Destroy() end
+    end
+
+    local function menuBtn(text,y,callback)
+        local b = Instance.new("TextButton", menu)
+        b.Size = UDim2.new(1,0,0.18,0)
+        b.Position = UDim2.new(0,0,y,0)
+        b.Text = text
+        b.BackgroundColor3 = Color3.fromRGB(100,30,30)
+        b.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(callback)
+    end
+
+    local savedPos
+
+    -- PLAYER MENU
+    menuBtn("Player",0,function()
+        clearContent()
+
+        local function fbtn(text,y,func)
+            local b = Instance.new("TextButton", content)
+            b.Size = UDim2.new(0.8,0,0.15,0)
+            b.Position = UDim2.new(0.1,0,y,0)
+            b.Text = text
+            b.BackgroundColor3 = Color3.fromRGB(90,20,20)
+            b.TextColor3 = Color3.new(1,1,1)
+            Instance.new("UICorner", b)
+            b.MouseButton1Click:Connect(func)
+        end
+
+        fbtn("Speed ⚡",0,function()
+            local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+            if hum then hum.WalkSpeed = 80 end
+        end)
+
+        fbtn("Fly ✈️",0.2,function()
+            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local bv = Instance.new("BodyVelocity", root)
+                bv.Velocity = Vector3.new(0,50,0)
+                bv.MaxForce = Vector3.new(99999,99999,99999)
+                task.wait(2)
+                bv:Destroy()
+            end
+        end)
+    end)
+
+    -- TELEPORT
+    menuBtn("Teleport",0.2,function()
+        clearContent()
+
+        local save = Instance.new("TextButton", content)
+        save.Size = UDim2.new(0.8,0,0.15,0)
+        save.Position = UDim2.new(0.1,0,0,0)
+        save.Text = "Save 📍"
+
+        save.MouseButton1Click:Connect(function()
+            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if root then savedPos = root.CFrame end
+        end)
+
+        local load = save:Clone()
+        load.Position = UDim2.new(0.1,0,0.2,0)
+        load.Text = "Load ⚡"
+        load.Parent = content
+
+        load.MouseButton1Click:Connect(function()
+            if savedPos and player.Character then
+                player.Character:PivotTo(savedPos)
+            end
+        end)
+    end)
+
+    -- EXECUTOR
+    menuBtn("Executor",0.4,function()
+        clearContent()
+
+        local box = Instance.new("TextBox", content)
+        box.Size = UDim2.new(0.9,0,0.35,0)
+        box.Position = UDim2.new(0.05,0,0,0)
+        box.PlaceholderText = "loadstring(...) or URL"
+        box.ClearTextOnFocus = false
+        box.TextXAlignment = Enum.TextXAlignment.Left
+        box.TextYAlignment = Enum.TextYAlignment.Top
+        box.BackgroundColor3 = Color3.fromRGB(30,10,10)
+        box.TextColor3 = Color3.new(1,1,1)
+
+        local console = Instance.new("TextLabel", content)
+        console.Size = UDim2.new(0.9,0,0.25,0)
+        console.Position = UDim2.new(0.05,0,0.37,0)
+        console.Text = "[ ONYX CONSOLE ]"
+        console.TextColor3 = Color3.fromRGB(0,255,150)
+        console.BackgroundColor3 = Color3.fromRGB(20,5,5)
+
+        local history = {}
+
+        local function log(t)
+            console.Text = console.Text.."\n"..t
+        end
+
+        local exec = Instance.new("TextButton", content)
+        exec.Size = UDim2.new(0.4,0,0.12,0)
+        exec.Position = UDim2.new(0.05,0,0.65,0)
+        exec.Text = "EXECUTE"
+
+        exec.MouseButton1Click:Connect(function()
+            local code = box.Text
+            table.insert(history, code)
+
+            local success, err = pcall(function()
+                loadstring(code)()
+            end)
+
+            if success then
+                log("SUCCESS ✅")
+            else
+                log("ERROR ❌")
+            end
+        end)
+
+        local urlBtn = Instance.new("TextButton", content)
+        urlBtn.Size = UDim2.new(0.4,0,0.12,0)
+        urlBtn.Position = UDim2.new(0.55,0,0.65,0)
+        urlBtn.Text = "LOAD URL 🌐"
+
+        urlBtn.MouseButton1Click:Connect(function()
+            local success, result = pcall(function()
+                return game:HttpGet(box.Text)
+            end)
+
+            if success then
+                loadstring(result)()
+                log("URL EXECUTED ✅")
+            else
+                log("URL ERROR ❌")
+            end
+        end)
+    end)
+end
+
+-- START
+loadFree()
