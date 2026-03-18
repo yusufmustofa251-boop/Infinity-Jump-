@@ -1,0 +1,228 @@
+-- ONYX TRUE FINAL FORM 👑🔥
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+-- ================= FRAME =================
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,0,0,0)
+frame.Position = UDim2.new(0.5,0,0.25,0)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.BackgroundTransparency = 1
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,30)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(255,0,80)
+stroke.Thickness = 2
+
+-- ================= GOD OPEN ANIMATION =================
+task.spawn(function()
+	task.wait(0.05)
+
+	frame:TweenSize(UDim2.new(0,680,0,360),"Out","Quad",0.15,true)
+	frame:TweenPosition(UDim2.new(0.5,-340,0.33,-180),"Out","Quad",0.15,true)
+
+	task.wait(0.1)
+
+	frame:TweenSize(UDim2.new(0,650,0,340),"Out","Quad",0.12,true)
+	frame:TweenPosition(UDim2.new(0.5,-325,0.33,-170),"Out","Quad",0.12,true)
+
+	for i=1,10 do
+		frame.BackgroundTransparency -= 0.1
+		task.wait(0.015)
+	end
+end)
+
+-- ================= GLOW ANIMATION =================
+task.spawn(function()
+	while true do
+		for i=0,1,0.05 do
+			stroke.Color = Color3.fromRGB(255,i*80,80)
+			task.wait(0.03)
+		end
+		for i=1,0,-0.05 do
+			stroke.Color = Color3.fromRGB(255,i*80,80)
+			task.wait(0.03)
+		end
+	end
+end)
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0.12,0)
+title.Text = "ONYX TRUE FINAL 👑"
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255,0,80)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+
+-- ================= MENU =================
+local menu = Instance.new("Frame", frame)
+menu.Size = UDim2.new(0.25,0,0.88,0)
+menu.Position = UDim2.new(0,0,0.12,0)
+menu.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Instance.new("UICorner", menu).CornerRadius = UDim.new(0,20)
+
+-- ================= CONTENT =================
+local content = Instance.new("Frame", frame)
+content.Size = UDim2.new(0.75,0,0.88,0)
+content.Position = UDim2.new(0.25,0,0.12,0)
+content.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", content).CornerRadius = UDim.new(0,20)
+
+local function clear()
+	for _,v in pairs(content:GetChildren()) do v:Destroy() end
+end
+
+-- ================= BUTTON GOD =================
+local function btn(parent,text,y,func)
+	local b = Instance.new("TextButton", parent)
+	b.Size = UDim2.new(0.85,0,0.12,0)
+	b.Position = UDim2.new(0.075,0,y,0)
+	b.Text = text
+	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	b.TextColor3 = Color3.new(1,1,1)
+	b.Font = Enum.Font.GothamBold
+
+	local corner = Instance.new("UICorner", b)
+	corner.CornerRadius = UDim.new(0,20)
+
+	local stroke = Instance.new("UIStroke", b)
+	stroke.Color = Color3.fromRGB(255,0,80)
+
+	b.MouseEnter:Connect(function()
+		b:TweenSize(UDim2.new(0.88,0,0.14,0),"Out","Quad",0.1,true)
+	end)
+
+	b.MouseLeave:Connect(function()
+		b:TweenSize(UDim2.new(0.85,0,0.12,0),"Out","Quad",0.1,true)
+	end)
+
+	b.MouseButton1Click:Connect(function()
+		b:TweenSize(UDim2.new(0.82,0,0.1,0),"Out","Quad",0.05,true)
+		task.wait(0.05)
+		b:TweenSize(UDim2.new(0.85,0,0.12,0),"Out","Quad",0.05,true)
+		func()
+	end)
+
+	return b
+end
+
+-- ================= STATES =================
+local states = {speed=false,jump=false,invisible=false}
+local isVIP = false
+
+local function apply()
+	local char = player.Character
+	if not char then return end
+	local hum = char:FindFirstChild("Humanoid")
+
+	if hum then
+		hum.WalkSpeed = states.speed and 80 or 16
+		hum.JumpPower = states.jump and 100 or 50
+	end
+
+	for _,v in pairs(char:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Transparency = states.invisible and 0.7 or 0
+		end
+	end
+end
+
+player.CharacterAdded:Connect(function()
+	task.wait(0.5)
+	apply()
+end)
+
+-- ================= PLAYER =================
+local function playerMenu()
+	clear()
+
+	btn(content,"Speed ⚡",0,function()
+		states.speed = not states.speed
+		apply()
+	end)
+
+	btn(content,"Jump 🦘",0.15,function()
+		states.jump = not states.jump
+		apply()
+	end)
+
+	btn(content,"Invisible 👻",0.3,function()
+		states.invisible = not states.invisible
+		apply()
+	end)
+end
+
+-- ================= TELEPORT =================
+local savedPos
+
+local function teleportMenu()
+	clear()
+
+	btn(content,"Save 📍",0,function()
+		local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if r then savedPos = r.CFrame end
+	end)
+
+	btn(content,"Teleport ⚡",0.2,function()
+		local char = player.Character
+		if savedPos and char then
+			char:PivotTo(savedPos)
+		end
+	end)
+end
+
+-- ================= EXECUTOR =================
+local function executorMenu()
+	clear()
+
+	local box = Instance.new("TextBox", content)
+	box.Size = UDim2.new(0.9,0,0.2,0)
+	box.Position = UDim2.new(0.05,0,0,0)
+	box.PlaceholderText = "Script / URL"
+
+	btn(content,"EXECUTE",0.25,function()
+		pcall(function() loadstring(box.Text)() end)
+	end)
+end
+
+-- ================= VIP =================
+local function vipMenu()
+	clear()
+
+	if not isVIP then
+		local box = Instance.new("TextBox", content)
+		box.Size = UDim2.new(0.6,0,0.15,0)
+		box.Position = UDim2.new(0.2,0,0.2,0)
+		box.PlaceholderText = "VIP PASSWORD"
+
+		btn(content,"LOGIN",0.4,function()
+			if box.Text == "VIPONLY" then
+				isVIP = true
+				vipMenu()
+			end
+		end)
+	else
+		local label = Instance.new("TextLabel", content)
+		label.Size = UDim2.new(1,0,0.2,0)
+		label.Text = "FreeVIP 👑"
+		label.BackgroundTransparency = 1
+		label.TextColor3 = Color3.fromRGB(255,0,80)
+
+		btn(content,"Super Speed ⚡",0.3,function()
+			states.speed = true
+			apply()
+		end)
+	end
+end
+
+-- ================= MENU BUTTON =================
+btn(menu,"Player",0.05,playerMenu)
+btn(menu,"Teleport",0.25,teleportMenu)
+btn(menu,"Executor",0.45,executorMenu)
+btn(menu,"VIP",0.65,vipMenu)
+
+playerMenu()
