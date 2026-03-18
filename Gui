@@ -1,0 +1,91 @@
+local player = game.Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 280, 0, 190)
+frame.Position = UDim2.new(0.5, -140, 0.5, -95)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BorderSizePixel = 0
+
+local frameCorner = Instance.new("UICorner", frame)
+frameCorner.CornerRadius = UDim.new(0,10)
+
+-- TITLE BAR (KOSONG)
+local titleBar = Instance.new("Frame", frame)
+titleBar.Size = UDim2.new(1,0,0,30)
+titleBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+
+local titleCorner = Instance.new("UICorner", titleBar)
+titleCorner.CornerRadius = UDim.new(0,10)
+
+-- CLOSE BUTTON (BULAT)
+local close = Instance.new("TextButton", titleBar)
+close.Size = UDim2.new(0,24,0,24)
+close.Position = UDim2.new(1,-30,0.5,-12)
+close.BackgroundColor3 = Color3.fromRGB(255,60,60)
+close.Text = ""
+
+local closeCorner = Instance.new("UICorner", close)
+closeCorner.CornerRadius = UDim.new(1,0)
+
+close.MouseButton1Click:Connect(function()
+    gui.Enabled = false
+end)
+
+-- DRAG
+local dragging, dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- 🔑 TEXTBOX (TENGAH)
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(0.7,0,0.25,0)
+box.Position = UDim2.new(0.15,0,0.4,0)
+box.PlaceholderText = "Enter Key"
+box.BackgroundColor3 = Color3.fromRGB(40,40,40)
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.TextScaled = true
+box.TextXAlignment = Enum.TextXAlignment.Center
+box.TextYAlignment = Enum.TextYAlignment.Center
+
+local boxCorner = Instance.new("UICorner", box)
+boxCorner.CornerRadius = UDim.new(0,8)
+
+-- 🔘 LOGIN (GESER KIRI DIKIT)
+local login = Instance.new("TextButton", frame)
+login.Size = UDim2.new(0.5,0,0.22,0)
+login.Position = UDim2.new(0.2,0,0.7,0)
+login.Text = "LOGIN"
+login.BackgroundColor3 = Color3.fromRGB(0,170,255)
+login.TextColor3 = Color3.fromRGB(255,255,255)
+login.TextScaled = true
+
+local loginCorner = Instance.new("UICorner", login)
+loginCorner.CornerRadius = UDim.new(0,8)
