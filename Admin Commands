@@ -1,0 +1,350 @@
+loadstring([[
+--[[
+    BRIAN EXECUTOR - ADMIN COMMANDS + EXECUTOR
+    Delta Executor Compatible
+]]
+
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TeleportService = game:GetService("TeleportService")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Admin list
+local ADMINS = {[LocalPlayer.Name] = true}
+local BannedPlayers = {}
+local SelectedPlayer = nil
+
+-- Notifikasi
+local function notify(title, text, duration)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = duration or 3
+        })
+    end)
+end
+
+notify("✅ ADMIN ACTIVE", "Welcome " .. LocalPlayer.Name, 5)
+
+-- Fungsi Admin
+local function isAdmin(p) return ADMINS[p.Name] end
+
+local function kickPlayer(target)
+    pcall(function() TeleportService:Teleport(6403373529, target) end)
+    pcall(function() if target.Character then target.Character:BreakJoints() end end)
+    notify("Kick", target.Name .. " kicked", 2)
+end
+
+local function banPlayer(target)
+    BannedPlayers[target.Name] = {userId = target.UserId}
+    kickPlayer(target)
+    notify("Ban", target.Name .. " banned", 2)
+end
+
+local function tpToPlayer(target)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
+        end
+    end
+end
+
+local function killPlayer(target)
+    pcall(function() if target.Character then target.Character:BreakJoints() end end)
+end
+
+local function freezePlayer(target, freeze)
+    pcall(function()
+        if target.Character then
+            local root = target.Character:FindFirstChild("HumanoidRootPart")
+            local hum = target.Character:FindFirstChild("Humanoid")
+            if root and hum then
+                root.Anchored = freeze
+                hum.WalkSpeed = freeze and 0 or 16
+            end
+        end
+    end)
+end
+
+-- Chat Commands
+local function onChat(player, msg)
+    if not isAdmin(player) then return end
+    if msg:sub(1,1) == "/" then
+        local parts = string.split(msg, " ")
+        local cmd = parts[1]:sub(2):lower()
+        local target = Players:FindFirstChild(parts[2])
+        
+        if not target then
+            for _,p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():find((parts[2] or ""):lower()) then target = p break end
+            end
+        end
+        
+        if cmd == "kick" and target then kickPlayer(target)
+        elseif cmd == "ban" and target then banPlayer(target)
+        elseif cmd == "tp" and target then tpToPlayer(target)
+        elseif cmd == "kill" and target then killPlayer(target)
+        elseif cmd == "freeze" and target then freezePlayer(target, true)
+        elseif cmd == "unfreeze" and target then freezePlayer(target, false)
+        elseif cmd == "admin" then print("Commands: /kick, /ban, /tp, /kill, /freeze, /unfreeze")
+        end
+    end
+end
+
+for _,p in pairs(Players:GetPlayers()) do p.Chatted:Connect(function(m) onChat(p,m) end) end
+Players.PlayerAdded:Connect(function(p) p.Chatted:Connect(function(m) onChat(p,m) end) end)
+
+-- GUI
+local function createGUI()
+    for _,v in pairs(game:GetService("CoreGui"):GetChildren()) do if v.Name == "BrianExec" then v:Destroy() end end
+    
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "BrianExec"
+    gui.Parent = game:GetService("CoreGui")
+    
+    local main = Instance.new("Frame")
+    main.Size = UDim2.new(0, 250, 0, 400)
+    main.Position = UDim2.new(0, 10, 0.5, -200)
+    main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    main.BorderColor3 = Color3.fromRGB(255,0,0)
+    main.BorderSizePixel = 2
+    main.Active = true
+    main.Draggable = true
+    main.Parent = gui
+    
+    local title = Instance.new("Frame")
+    title.Size = UDim2.new(1,0,0,30)
+    title.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    title.Parent = main
+    
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1,-40,1,0)
+    titleText.Position = UDim2.new(0,10,0,0)
+    titleText.BackgroundTransparency = 1
+    titleText.Text = "BRIAN EXECUTOR"
+    titleText.TextColor3 = Color3.new(1,1,1)
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextSize = 16
+    titleText.TextXAlignment = Enum.TextXAlignment.Left
+    titleText.Parent = title
+    
+    local close = Instance.new("TextButton")
+    close.Size = UDim2.new(0,30,1,0)
+    close.Position = UDim2.new(1,-30,0,0)
+    close.BackgroundColor3 = Color3.fromRGB(200,0,0)
+    close.Text = "X"
+    close.TextColor3 = Color3.new(1,1,1)
+    close.Font = Enum.Font.GothamBold
+    close.TextSize = 16
+    close.Parent = title
+    close.MouseButton1Click:Connect(function() gui:Destroy() end)
+    
+    local tabFrame = Instance.new("Frame")
+    tabFrame.Size = UDim2.new(1,-10,0,30)
+    tabFrame.Position = UDim2.new(0,5,0,35)
+    tabFrame.BackgroundTransparency = 1
+    tabFrame.Parent = main
+    
+    local adminTab = Instance.new("TextButton")
+    adminTab.Size = UDim2.new(0.5,-2,1,0)
+    adminTab.Position = UDim2.new(0,0,0,0)
+    adminTab.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    adminTab.Text = "ADMIN"
+    adminTab.TextColor3 = Color3.new(1,1,1)
+    adminTab.Font = Enum.Font.Gotham
+    adminTab.TextSize = 14
+    adminTab.Parent = tabFrame
+    
+    local execTab = Instance.new("TextButton")
+    execTab.Size = UDim2.new(0.5,-2,1,0)
+    execTab.Position = UDim2.new(0.5,2,0,0)
+    execTab.BackgroundColor3 = Color3.fromRGB(100,0,0)
+    execTab.Text = "EXECUTOR"
+    execTab.TextColor3 = Color3.new(1,1,1)
+    execTab.Font = Enum.Font.Gotham
+    execTab.TextSize = 14
+    execTab.Parent = tabFrame
+    
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1,-10,0,300)
+    content.Position = UDim2.new(0,5,0,70)
+    content.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    content.Parent = main
+    
+    -- ADMIN CONTENT
+    local adminContent = Instance.new("Frame")
+    adminContent.Size = UDim2.new(1,-10,1,-10)
+    adminContent.Position = UDim2.new(0,5,0,5)
+    adminContent.BackgroundTransparency = 1
+    adminContent.Visible = true
+    adminContent.Parent = content
+    
+    local playerList = Instance.new("ScrollingFrame")
+    playerList.Size = UDim2.new(1,0,0,100)
+    playerList.Position = UDim2.new(0,0,0,25)
+    playerList.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    playerList.BorderColor3 = Color3.fromRGB(255,0,0)
+    playerList.ScrollBarThickness = 8
+    playerList.CanvasSize = UDim2.new(0,0,0,0)
+    playerList.Parent = adminContent
+    
+    local listLabel = Instance.new("TextLabel")
+    listLabel.Size = UDim2.new(1,0,0,20)
+    listLabel.BackgroundTransparency = 1
+    listLabel.Text = "Player List:"
+    listLabel.TextColor3 = Color3.new(1,1,1)
+    listLabel.Font = Enum.Font.Gotham
+    listLabel.TextSize = 14
+    listLabel.TextXAlignment = Enum.TextXAlignment.Left
+    listLabel.Parent = adminContent
+    
+    local function updatePlayers()
+        for _,v in pairs(playerList:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+        local y = 0
+        for _,p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1,-10,0,25)
+                btn.Position = UDim2.new(0,5,0,y)
+                btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+                btn.Text = p.Name
+                btn.TextColor3 = Color3.new(1,1,1)
+                btn.Font = Enum.Font.Gotham
+                btn.TextSize = 14
+                btn.Parent = playerList
+                btn.MouseButton1Click:Connect(function()
+                    SelectedPlayer = p.Name
+                    for _,b in pairs(playerList:GetChildren()) do
+                        if b:IsA("TextButton") then b.BackgroundColor3 = Color3.fromRGB(60,60,60) end
+                    end
+                    btn.BackgroundColor3 = Color3.fromRGB(255,0,0)
+                end)
+                y = y + 27
+            end
+        end
+        playerList.CanvasSize = UDim2.new(0,0,0,y)
+    end
+    updatePlayers()
+    spawn(function() while true do task.wait(3) updatePlayers() end end)
+    
+    local function addBtn(name, y, cb)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.5,-5,0,30)
+        btn.Position = UDim2.new(0,0,0,y)
+        btn.BackgroundColor3 = Color3.fromRGB(255,0,0)
+        btn.Text = name
+        btn.TextColor3 = Color3.new(1,1,1)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 14
+        btn.Parent = adminContent
+        btn.MouseButton1Click:Connect(function()
+            if SelectedPlayer then
+                cb(Players:FindFirstChild(SelectedPlayer))
+            else
+                notify("Error", "Select player first", 2)
+            end
+        end)
+    end
+    
+    addBtn("Kick", 135, kickPlayer)
+    addBtn("Ban", 170, banPlayer)
+    addBtn("Teleport", 205, tpToPlayer)
+    addBtn("Kill", 240, killPlayer)
+    addBtn("Freeze", 275, function(p) freezePlayer(p, true) end)
+    addBtn("Unfreeze", 310, function(p) freezePlayer(p, false) end)
+    
+    -- EXECUTOR CONTENT
+    local execContent = Instance.new("Frame")
+    execContent.Size = UDim2.new(1,-10,1,-10)
+    execContent.Position = UDim2.new(0,5,0,5)
+    execContent.BackgroundTransparency = 1
+    execContent.Visible = false
+    execContent.Parent = content
+    
+    local scriptBox = Instance.new("TextBox")
+    scriptBox.Size = UDim2.new(1,0,0,150)
+    scriptBox.Position = UDim2.new(0,0,0,0)
+    scriptBox.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    scriptBox.TextColor3 = Color3.new(0,255,0)
+    scriptBox.PlaceholderText = "Paste script here..."
+    scriptBox.Font = Enum.Font.Code
+    scriptBox.TextSize = 12
+    scriptBox.TextXAlignment = Enum.TextXAlignment.Left
+    scriptBox.TextYAlignment = Enum.TextYAlignment.Top
+    scriptBox.MultiLine = true
+    scriptBox.ClearTextOnFocus = false
+    scriptBox.Parent = execContent
+    
+    local execBtn = Instance.new("TextButton")
+    execBtn.Size = UDim2.new(1,0,0,40)
+    execBtn.Position = UDim2.new(0,0,0,160)
+    execBtn.BackgroundColor3 = Color3.fromRGB(0,255,0)
+    execBtn.Text = "EXECUTE"
+    execBtn.TextColor3 = Color3.new(0,0,0)
+    execBtn.Font = Enum.Font.GothamBold
+    execBtn.TextSize = 16
+    execBtn.Parent = execContent
+    execBtn.MouseButton1Click:Connect(function()
+        local s = scriptBox.Text
+        if s and s ~= "" then
+            local success, err = pcall(function() loadstring(s)() end)
+            notify(success and "Success" or "Error", success and "Executed!" or err:sub(1,50), success and 2 or 3)
+        end
+    end)
+    
+    local clearBtn = Instance.new("TextButton")
+    clearBtn.Size = UDim2.new(1,0,0,30)
+    clearBtn.Position = UDim2.new(0,0,0,210)
+    clearBtn.BackgroundColor3 = Color3.fromRGB(255,100,0)
+    clearBtn.Text = "CLEAR"
+    clearBtn.TextColor3 = Color3.new(1,1,1)
+    clearBtn.Font = Enum.Font.Gotham
+    clearBtn.TextSize = 14
+    clearBtn.Parent = execContent
+    clearBtn.MouseButton1Click:Connect(function() scriptBox.Text = "" end)
+    
+    local ex1 = Instance.new("TextButton")
+    ex1.Size = UDim2.new(1,0,0,25)
+    ex1.Position = UDim2.new(0,0,0,275)
+    ex1.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    ex1.Text = "Print Hello"
+    ex1.TextColor3 = Color3.new(1,1,1)
+    ex1.Font = Enum.Font.Gotham
+    ex1.TextSize = 14
+    ex1.Parent = execContent
+    ex1.MouseButton1Click:Connect(function() scriptBox.Text = 'print("Hello!")' end)
+    
+    local ex2 = Instance.new("TextButton")
+    ex2.Size = UDim2.new(1,0,0,25)
+    ex2.Position = UDim2.new(0,0,0,305)
+    ex2.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    ex2.Text = "Inf Yield"
+    ex2.TextColor3 = Color3.new(1,1,1)
+    ex2.Font = Enum.Font.Gotham
+    ex2.TextSize = 14
+    ex2.Parent = execContent
+    ex2.MouseButton1Click:Connect(function() scriptBox.Text = [[loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()]] end)
+    
+    adminTab.MouseButton1Click:Connect(function()
+        adminContent.Visible = true
+        execContent.Visible = false
+        adminTab.BackgroundColor3 = Color3.fromRGB(255,0,0)
+        execTab.BackgroundColor3 = Color3.fromRGB(100,0,0)
+    end)
+    
+    execTab.MouseButton1Click:Connect(function()
+        adminContent.Visible = false
+        execContent.Visible = true
+        adminTab.BackgroundColor3 = Color3.fromRGB(100,0,0)
+        execTab.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    end)
+end
+
+createGUI()
+print("✅ Brian Executor - Admin Commands Active")
+]])()
