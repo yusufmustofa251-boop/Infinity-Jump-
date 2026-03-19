@@ -1,0 +1,588 @@
+--[[
+    ULTIMATE EXECUTOR BY BRIAN - COMPLETE EDITION
+    Fitur Lengkap:
+    ✓ Aimbot + ESP (dengan team check)
+    ✓ Fly (dengan kontrol WASD)
+    ✓ Auto Sword (otomatis serang)
+    ✓ Kill Aura Infinity (range tak terbatas)
+    ✓ Admin Commands (kick, ban, tp, kill, freeze)
+    ✓ Executor Loadstring (jalankan script apapun)
+    ✓ Notifikasi Auto (saat masuk game)
+    ✓ GUI Merah di sisi kiri
+]]
+
+-- Load Rayfield Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local TeleportService = game:GetService("TeleportService")
+
+-- ===== VARIABEL GLOBAL =====
+-- Aimbot Variables
+local AimbotEnabled = false
+local AimbotRadius = 150
+local AimbotSmoothness = 0.2
+local TeamCheckEnabled = true
+local AimbotTargetPart = "Head"
+
+-- ESP Variables
+local ESPEnabled = false
+local ESPPlayers = {}
+
+-- Fly Variables
+local FlyEnabled = false
+local FlySpeed = 50
+local BodyGyro = nil
+local BodyVelocity = nil
+
+-- Auto Sword Variables
+local AutoSwordEnabled = false
+local SwordCooldown = 0.3
+
+-- Kill Aura Variables
+local KillAuraEnabled = false
+local KillAuraDamage = 50
+local KillAuraCooldown = 0.1
+local lastKillAuraTime = 0
+
+-- Admin Commands Variables
+local ADMINS = {
+    [LocalPlayer.Name] = true, -- Kamu sendiri otomatis admin
+    -- Tambahkan admin lain di sini
+    -- ["UsernameTeman"] = true,
+}
+local BannedPlayers = {} -- Untuk session ban
+
+-- Executor Variables
+local scriptInput = "print('Hello from Brian Ultimate!')"
+
+-- ===== NOTIFIKASI SAAT MASUK =====
+local function sendJoinNotification()
+    local success, errorMsg = pcall(function()
+        -- Method 1: Notifikasi di kamera (CoreGui)
+        StarterGui:SetCore("SendNotification", {
+            Title = "✅ ADMIN COMMANDS ACTIVE",
+            Text = "Welcome " .. LocalPlayer.Name .. "!\nAdmin commands loaded successfully!",
+            Duration = 5
+        })
+    end)
+    
+    if not success then
+        -- Method 2: Fallback ke chat
+        pcall(function()
+            game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest"):FireServer(
+                "✅ ADMIN COMMANDS ACTIVE - Loaded by " .. LocalPlayer.Name, "All"
+            )
+        end)
+        
+        -- Method 3: Chat manual lewat LocalPlayer
+        pcall(function()
+            LocalPlayer:Chat("✅ ADMIN COMMANDS ACTIVE - Welcome " .. LocalPlayer.Name)
+        end)
+    end
+    
+    -- Method 4: Print di console (selalu ada)
+    print("[[[ ADMIN COMMANDS ACTIVE ]]] Welcome " .. LocalPlayer.Name)
+end
+
+-- Panggil notifikasi saat script dimuat
+sendJoinNotification()
+
+-- Juga panggil saat player masuk ke game baru (respawn/teleport)
+LocalPlayer.OnTeleport:Connect(function()
+    wait(2) -- Tunggu sedikit agar game ready
+    sendJoinNotification()
+end)
+
+-- ===== FUNGSI TEAM CHECK =====
+local function IsTeamMate(player)
+    if not TeamCheckEnabled then return false end
+    if not player then return false end
+    
+    local LocalTeam = nil
+    local TargetTeam = nil
+    
+    pcall(function()
+        if LocalPlayer.Team then
+            LocalTeam = LocalPlayer.Team
+        end
+        if player.Team then
+            TargetTeam = player.Team
+        end
+    end)
+    
+    if LocalTeam and TargetTeam then
+        return LocalTeam == TargetTeam
+    end
+    
+    pcall(function()
+        if LocalPlayer.TeamColor and player.TeamColor then
+            return LocalPlayer.TeamColor == player.TeamColor
+        end
+    end)
+    
+    return false
+end
+
+-- ===== FUNGSI ADMIN COMMANDS =====
+local function isAdmin(player)
+    return ADMINS[player.Name] == true
+end
+
+-- Fungsi kick player
+local function kickPlayer(targetPlayer, reason)
+    reason = reason or "Kicked by Admin"
+    
+    -- Method 1: Teleport ke game lain
+    pcall(function()
+        TeleportService:Teleport(6403373529, targetPlayer) -- Game ID testing
+    end)
+    
+    -- Method 2: Remote event kick
+    pcall(function()
+        local args = {
+            [1] = targetPlayer,
+            [2] = reason
+        }
+        local remote = game:GetService("ReplicatedStorage"):FindFirstChild("KickEvent") or
+                      game:GetService("ReplicatedStorage"):FindFirstChild("KickPlayer") or
+                      game:GetService("ReplicatedStorage"):FindFirstChild("AdminKick")
+        if remote then
+            remote:FireServer(unpack(args))
+        end
+    end)
+    
+    -- Method 3: Force character removal
+    pcall(function()
+        if targetPlayer.Character then
+            targetPlayer.Character:BreakJoints()
+        end
+    end)
+    
+    print(string.format("[ADMIN] %s kicked %s | Reason: %s", 
+        LocalPlayer.Name, targetPlayer.Name, reason))
+end
+
+-- Fungsi ban (session)
+local function banPlayer(targetPlayer, reason)
+    reason = reason or "Banned by Admin"
+    BannedPlayers[targetPlayer.Name] = {
+        userId = targetPlayer.UserId,
+        reason = reason,
+        time = os.time()
+    }
+    kickPlayer(targetPlayer, reason)
+    print(string.format("[ADMIN] %s banned %s (session) | Reason: %s", 
+        LocalPlayer.Name, targetPlayer.Name, reason))
+end
+
+-- Fungsi teleport ke player
+local function teleportToPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local LocalChar = LocalPlayer.Character
+        if LocalChar and LocalChar:FindFirstChild("HumanoidRootPart") then
+            LocalChar.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+            print(string.format("[ADMIN] Teleported to %s", targetPlayer.Name))
+        end
+    end
+end
+
+-- Fungsi kill player
+local function killPlayer(targetPlayer)
+    pcall(function()
+        if targetPlayer.Character then
+            targetPlayer.Character:BreakJoints()
+        end
+    end)
+    print(string.format("[ADMIN] Killed %s", targetPlayer.Name))
+end
+
+-- Fungsi freeze player
+local function freezePlayer(targetPlayer, freeze)
+    pcall(function()
+        if targetPlayer.Character then
+            local root = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+            if root and humanoid then
+                if freeze then
+                    root.Anchored = true
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                else
+                    root.Anchored = false
+                    humanoid.WalkSpeed = 16
+                    humanoid.JumpPower = 50
+                end
+            end
+        end
+    end)
+end
+
+-- Fungsi chat command listener
+local function onPlayerChatted(player, message)
+    -- Cek apakah admin
+    if not isAdmin(player) then return end
+    
+    -- Parse command (bisa pake / atau !)
+    if message:sub(1, 1) == "/" or message:sub(1, 1) == "!" then
+        local parts = string.split(message, " ")
+        local cmd = parts[1]:sub(2):lower()
+        local targetName = parts[2]
+        local reason = table.concat(parts, " ", 3)
+        
+        -- Cari target player
+        local targetPlayer = nil
+        if targetName then
+            targetPlayer = Players:FindFirstChild(targetName)
+            if not targetPlayer then
+                -- Coba cari partial match
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p.Name:lower():find(targetName:lower()) then
+                        targetPlayer = p
+                        break
+                    end
+                end
+            end
+        end
+        
+        -- Eksekusi command
+        if cmd == "kick" and targetPlayer then
+            kickPlayer(targetPlayer, reason)
+        elseif cmd == "ban" and targetPlayer then
+            banPlayer(targetPlayer, reason)
+        elseif cmd == "tp" and targetPlayer then
+            teleportToPlayer(targetPlayer)
+        elseif cmd == "kill" and targetPlayer then
+            killPlayer(targetPlayer)
+        elseif cmd == "freeze" and targetPlayer then
+            freezePlayer(targetPlayer, true)
+        elseif cmd == "unfreeze" and targetPlayer then
+            freezePlayer(targetPlayer, false)
+        elseif cmd == "admin" then
+            print("[ADMIN] Available commands: /kick, /ban, /tp, /kill, /freeze, /unfreeze")
+        elseif cmd == "adminlist" then
+            local adminList = "Admins: "
+            for admin, _ in pairs(ADMINS) do
+                adminList = adminList .. admin .. ", "
+            end
+            print(adminList)
+        end
+    end
+end
+
+-- Setup chat listener
+for _, player in pairs(Players:GetPlayers()) do
+    player.Chatted:Connect(function(msg)
+        onPlayerChatted(player, msg)
+    end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(msg)
+        onPlayerChatted(player, msg)
+    end)
+end)
+
+-- ===== AIMBOT =====
+local function GetClosestTarget()
+    local ClosestPlayer = nil
+    local ShortestDistance = AimbotRadius
+    local LocalChar = LocalPlayer.Character
+    
+    if not LocalChar or not LocalChar:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    
+    local LocalRoot = LocalChar.HumanoidRootPart
+    local LocalPos = LocalRoot.Position
+    
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player ~= LocalPlayer and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            local Humanoid = Player.Character.Humanoid
+            if Humanoid.Health > 0 and not IsTeamMate(Player) then
+                local TargetPart = Player.Character:FindFirstChild(AimbotTargetPart) or 
+                                  Player.Character:FindFirstChild("HumanoidRootPart")
+                if TargetPart then
+                    local Distance = (TargetPart.Position - LocalPos).Magnitude
+                    if Distance < ShortestDistance then
+                        ShortestDistance = Distance
+                        ClosestPlayer = Player
+                    end
+                end
+            end
+        end
+    end
+    
+    return ClosestPlayer
+end
+
+local function AimAt(Target)
+    if not Target or not Target.Character then return end
+    
+    local TargetPart = Target.Character:FindFirstChild(AimbotTargetPart) or 
+                      Target.Character:FindFirstChild("HumanoidRootPart")
+    if not TargetPart then return end
+    
+    local LocalChar = LocalPlayer.Character
+    if not LocalChar or not LocalChar:FindFirstChild("HumanoidRootPart") then return end
+    
+    local TargetPosition = TargetPart.Position
+    if AimbotTargetPart == "Head" then
+        TargetPosition = TargetPosition + Vector3.new(0, 0.5, 0)
+    end
+    
+    local Direction = (TargetPosition - Camera.CFrame.Position).unit
+    local CurrentLook = Camera.CFrame.LookVector
+    local SmoothDirection = CurrentLook:Lerp(Direction, AimbotSmoothness)
+    
+    Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, Camera.CFrame.Position + SmoothDirection)
+end
+
+RunService.RenderStepped:Connect(function()
+    if AimbotEnabled then
+        local Target = GetClosestTarget()
+        if Target then
+            AimAt(Target)
+        end
+    end
+end)
+
+-- ===== ESP =====
+local function CreateESP(Player)
+    if ESPPlayers[Player] then
+        for _, DrawingObj in pairs(ESPPlayers[Player]) do
+            pcall(function() DrawingObj:Remove() end)
+        end
+    end
+    
+    local Box = Drawing.new("Square")
+    Box.Visible = false
+    Box.Thickness = 1.5
+    Box.Color = Color3.new(1, 0, 0)
+    Box.Filled = false
+    
+    local NameLabel = Drawing.new("Text")
+    NameLabel.Visible = false
+    NameLabel.Center = true
+    NameLabel.Outline = true
+    NameLabel.Size = 16
+    NameLabel.Color = Color3.new(1, 1, 1)
+    
+    local DistanceLabel = Drawing.new("Text")
+    DistanceLabel.Visible = false
+    DistanceLabel.Center = true
+    DistanceLabel.Outline = true
+    DistanceLabel.Size = 14
+    DistanceLabel.Color = Color3.new(1, 1, 0)
+    
+    local HealthBar = Drawing.new("Square")
+    HealthBar.Visible = false
+    HealthBar.Thickness = 1
+    HealthBar.Color = Color3.new(0, 1, 0)
+    HealthBar.Filled = true
+    
+    ESPPlayers[Player] = {
+        Box = Box,
+        Name = NameLabel,
+        Distance = DistanceLabel,
+        Health = HealthBar
+    }
+end
+
+RunService.RenderStepped:Connect(function()
+    if not ESPEnabled then
+        for _, ESPData in pairs(ESPPlayers) do
+            if ESPData.Box then ESPData.Box.Visible = false end
+            if ESPData.Name then ESPData.Name.Visible = false end
+            if ESPData.Distance then ESPData.Distance.Visible = false end
+            if ESPData.Health then ESPData.Health.Visible = false end
+        end
+        return
+    end
+    
+    local LocalChar = LocalPlayer.Character
+    local LocalRoot = LocalChar and LocalChar:FindFirstChild("HumanoidRootPart")
+    
+    for Player, ESPData in pairs(ESPPlayers) do
+        if not Player or not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then
+            if ESPData.Box then ESPData.Box.Visible = false end
+            if ESPData.Name then ESPData.Name.Visible = false end
+            if ESPData.Distance then ESPData.Distance.Visible = false end
+            if ESPData.Health then ESPData.Health.Visible = false end
+            continue
+        end
+        
+        if TeamCheckEnabled and IsTeamMate(Player) then
+            if ESPData.Box then ESPData.Box.Visible = false end
+            if ESPData.Name then ESPData.Name.Visible = false end
+            if ESPData.Distance then ESPData.Distance.Visible = false end
+            if ESPData.Health then ESPData.Health.Visible = false end
+            continue
+        end
+        
+        local TargetRoot = Player.Character.HumanoidRootPart
+        local TargetHead = Player.Character:FindFirstChild("Head") or TargetRoot
+        local Humanoid = Player.Character:FindFirstChild("Humanoid")
+        
+        local Vector, OnScreen = Camera:WorldToViewportPoint(TargetRoot.Position)
+        local HeadVector, _ = Camera:WorldToViewportPoint(TargetHead.Position + Vector3.new(0, 2, 0))
+        local FeetVector, _ = Camera:WorldToViewportPoint(TargetRoot.Position - Vector3.new(0, 3, 0))
+        
+        if OnScreen then
+            local BoxHeight = math.abs(HeadVector.Y - FeetVector.Y)
+            local BoxWidth = BoxHeight * 0.6
+            
+            if ESPData.Box then
+                ESPData.Box.Visible = true
+                ESPData.Box.Position = Vector2.new(Vector.X - BoxWidth/2, Vector.Y - BoxHeight/2)
+                ESPData.Box.Size = Vector2.new(BoxWidth, BoxHeight)
+                ESPData.Box.Color = TeamCheckEnabled and Color3.new(1, 0, 0) or Color3.new(0, 0, 1)
+            end
+            
+            if ESPData.Name then
+                ESPData.Name.Visible = true
+                ESPData.Name.Position = Vector2.new(Vector.X, Vector.Y - BoxHeight/2 - 20)
+                ESPData.Name.Text = Player.Name
+            end
+            
+            if ESPData.Distance and LocalRoot then
+                ESPData.Distance.Visible = true
+                ESPData.Distance.Position = Vector2.new(Vector.X, Vector.Y + BoxHeight/2 + 5)
+                local Dist = (TargetRoot.Position - LocalRoot.Position).Magnitude
+                ESPData.Distance.Text = string.format("%.1f m", Dist)
+            end
+            
+            if ESPData.Health and Humanoid then
+                ESPData.Health.Visible = true
+                local HealthPercent = Humanoid.Health / Humanoid.MaxHealth
+                ESPData.Health.Position = Vector2.new(Vector.X - BoxWidth/2, Vector.Y - BoxHeight/2 - 5)
+                ESPData.Health.Size = Vector2.new(BoxWidth * HealthPercent, 3)
+                ESPData.Health.Color = Color3.new(1 - HealthPercent, HealthPercent, 0)
+            end
+        else
+            if ESPData.Box then ESPData.Box.Visible = false end
+            if ESPData.Name then ESPData.Name.Visible = false end
+            if ESPData.Distance then ESPData.Distance.Visible = false end
+            if ESPData.Health then ESPData.Health.Visible = false end
+        end
+    end
+end)
+
+Players.PlayerAdded:Connect(function(Player)
+    if Player ~= LocalPlayer then
+        CreateESP(Player)
+    end
+end)
+
+for _, Player in pairs(Players:GetPlayers()) do
+    if Player ~= LocalPlayer then
+        CreateESP(Player)
+    end
+end
+
+Players.PlayerRemoving:Connect(function(Player)
+    if ESPPlayers[Player] then
+        for _, DrawingObj in pairs(ESPPlayers[Player]) do
+            pcall(function() DrawingObj:Remove() end)
+        end
+        ESPPlayers[Player] = nil
+    end
+end)
+
+-- ===== FLY =====
+local function setupFly()
+    local LocalChar = LocalPlayer.Character
+    if not LocalChar then return end
+    
+    local Humanoid = LocalChar:FindFirstChild("Humanoid")
+    local RootPart = LocalChar:FindFirstChild("HumanoidRootPart")
+    
+    if not Humanoid or not RootPart then return end
+    
+    Humanoid.PlatformStand = true
+    
+    BodyVelocity = Instance.new("BodyVelocity")
+    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    BodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+    BodyVelocity.Parent = RootPart
+    
+    BodyGyro = Instance.new("BodyGyro")
+    BodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+    BodyGyro.Parent = RootPart
+end
+
+local function cleanupFly()
+    if BodyVelocity then
+        BodyVelocity:Destroy()
+        BodyVelocity = nil
+    end
+    if BodyGyro then
+        BodyGyro:Destroy()
+        BodyGyro = nil
+    end
+    
+    local LocalChar = LocalPlayer.Character
+    if LocalChar then
+        local Humanoid = LocalChar:FindFirstChild("Humanoid")
+        if Humanoid then
+            Humanoid.PlatformStand = false
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    if FlyEnabled and LocalPlayer.Character then
+        local RootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if RootPart and BodyVelocity and BodyGyro then
+            local moveDirection = Vector3.new(0, 0, 0)
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                moveDirection = moveDirection + Camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                moveDirection = moveDirection - Camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                moveDirection = moveDirection - Camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                moveDirection = moveDirection + Camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                moveDirection = moveDirection + Vector3.new(0, 1, 0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                moveDirection = moveDirection + Vector3.new(0, -1, 0)
+            end
+            
+            if moveDirection.Magnitude > 0 then
+                moveDirection = moveDirection.Unit * FlySpeed
+            end
+            
+            BodyVelocity.Velocity = moveDirection
+            BodyGyro.CFrame = CFrame.new(RootPart.Position, RootPart.Position + Camera.CFrame.LookVector)
+        end
+    end
+end)
+
+-- ===== AUTO SWORD =====
+local function findNearestEnemy()
+    local LocalChar = LocalPlayer.Character
+    if not LocalChar or not LocalChar:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    
+    local LocalRoot = LocalChar.HumanoidRootPart
+    local LocalPos = LocalRoot.Position
+    local ClosestPlayer = nil
+    local ClosestDistance = math.huge
+    
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player ~= 
