@@ -1,0 +1,326 @@
+-- GUI Admin Commands Script
+-- Compatible with most Roblox executors
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdminCommandsGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Add corner radius
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 10)
+Corner.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
+
+-- Title Text
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Admin Commands"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = TitleBar
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextScaled = true
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.BorderSizePixel = 0
+CloseButton.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 5)
+CloseCorner.Parent = CloseButton
+
+-- Scroll Frame for Commands
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 1, -60)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 50)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 5
+ScrollFrame.Parent = MainFrame
+
+local Layout = Instance.new("UIListLayout")
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Padding = UDim.new(0, 5)
+Layout.Parent = ScrollFrame
+
+-- Command Functions
+local function createButton(text, func)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -10, 0, 35)
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Button.Text = text
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextScaled = true
+    Button.Font = Enum.Font.Gotham
+    Button.BorderSizePixel = 0
+    Button.Parent = ScrollFrame
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 5)
+    ButtonCorner.Parent = Button
+    
+    Button.MouseButton1Click:Connect(func)
+    
+    -- Hover effect
+    Button.MouseEnter:Connect(function()
+        Button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    end)
+    
+    return Button
+end
+
+-- Admin Commands
+createButton("God Mode (LocalPlayer)", function()
+    pcall(function()
+        LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+        LocalPlayer.Character.Humanoid.Health = math.huge
+    end)
+end)
+
+createButton("Speed Boost (50)", function()
+    pcall(function()
+        LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    end)
+end)
+
+createButton("Jump Power (100)", function()
+    pcall(function()
+        LocalPlayer.Character.Humanoid.JumpPower = 100
+    end)
+end)
+
+createButton("Fly Toggle", function()
+    pcall(function()
+        local character = LocalPlayer.Character
+        local humanoid = character.Humanoid
+        local rootPart = character.HumanoidRootPart
+        
+        if not _G.Flying then
+            _G.Flying = true
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = rootPart
+            
+            local connection
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                if not _G.Flying then
+                    connection:Disconnect()
+                    bodyVelocity:Destroy()
+                    return
+                end
+                
+                local camera = workspace.CurrentCamera
+                local moveVector = humanoid.MoveDirection * 16
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    bodyVelocity.Velocity = camera.CFrame.LookVector * 16 + Vector3.new(0, 16, 0)
+                elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    bodyVelocity.Velocity = camera.CFrame.LookVector * 16 + Vector3.new(0, -16, 0)
+                else
+                    bodyVelocity.Velocity = camera.CFrame.LookVector * moveVector.Magnitude
+                end
+            end)
+        else
+            _G.Flying = false
+        end
+    end)
+end)
+
+createButton("Noclip Toggle", function()
+    pcall(function()
+        _G.Noclip = not _G.Noclip
+        local character = LocalPlayer.Character
+        
+        if _G.Noclip then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        else
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end)
+end)
+
+createButton("Infinite Jump", function()
+    pcall(function()
+        local InfiniteJumpEnabled = true
+        game:GetService("UserInputService").JumpRequest:connect(function()
+            if InfiniteJumpEnabled then
+                LocalPlayer.Character:FindFirstChild("Humanoid"):ChangeState("Jumping")
+            end
+        end)
+    end)
+end)
+
+createButton("Reset Character", function()
+    pcall(function()
+        LocalPlayer.Character.Humanoid.Health = 0
+    end)
+end)
+
+createButton("Teleport to Spawn", function()
+    pcall(function()
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 50, 0)
+    end)
+end)
+
+createButton("Day Time", function()
+    pcall(function()
+        Lighting.TimeOfDay = "12:00:00"
+    end)
+end)
+
+createButton("Night Time", function()
+    pcall(function()
+        Lighting.TimeOfDay = "00:00:00"
+    end)
+end)
+
+createButton("Fullbright", function()
+    pcall(function()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end)
+end)
+
+createButton("ESP Players", function()
+    pcall(function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local highlight = Instance.new("Highlight")
+                highlight.Parent = player.Character
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            end
+        end
+    end)
+end)
+
+createButton("Remove ESP", function()
+    pcall(function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                local highlight = player.Character:FindFirstChild("Highlight")
+                if highlight then
+                    highlight:Destroy()
+                end
+            end
+        end
+    end)
+end)
+
+createButton("Rejoin Server", function()
+    pcall(function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+    end)
+end)
+
+-- Update ScrollFrame size
+local function updateScrollFrame()
+    local contentSize = Layout.AbsoluteContentSize.Y
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, contentSize + 10)
+end
+
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScrollFrame)
+updateScrollFrame()
+
+-- Dragging functionality
+local dragging = false
+local dragInput, mousePos, framePos
+
+local function updateInput(input)
+    local delta = input.Position - mousePos
+    MainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+end
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateInput(input)
+    end
+end)
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Toggle GUI with Right Ctrl
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightControl then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+print("Admin Commands GUI Loaded! Press Right Ctrl to toggle.")
