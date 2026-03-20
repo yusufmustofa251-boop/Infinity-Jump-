@@ -1,0 +1,91 @@
+--[[
+    LOADSTRING EXECUTOR - MERAH
+    Fitur: Execute + Clear
+]]
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "LoadstringExec"
+gui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 250, 0, 120)
+frame.Position = UDim2.new(1, -260, 0, 10)
+frame.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -10, 0, 25)
+title.Position = UDim2.new(0, 5, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "📦 LOADSTRING EXECUTOR"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+local textbox = Instance.new("TextBox")
+textbox.Size = UDim2.new(1, -20, 0, 35)
+textbox.Position = UDim2.new(0, 10, 0, 35)
+textbox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+textbox.TextColor3 = Color3.new(0,255,0)
+textbox.PlaceholderText = "Paste script here..."
+textbox.Font = Enum.Font.Code
+textbox.TextSize = 12
+textbox.ClearTextOnFocus = false
+textbox.Parent = frame
+
+local textCorner = Instance.new("UICorner")
+textCorner.CornerRadius = UDim.new(0, 6)
+textCorner.Parent = textbox
+
+local execute = Instance.new("TextButton")
+execute.Size = UDim2.new(0.5, -5, 0, 30)
+execute.Position = UDim2.new(0, 10, 0, 80)
+execute.BackgroundColor3 = Color3.fromRGB(0,100,0)
+execute.Text = "▶️ EXECUTE"
+execute.TextColor3 = Color3.new(1,1,1)
+execute.Font = Enum.Font.GothamBold
+execute.TextSize = 12
+execute.Parent = frame
+
+local execCorner = Instance.new("UICorner")
+execCorner.CornerRadius = UDim.new(0, 6)
+execCorner.Parent = execute
+
+local clear = Instance.new("TextButton")
+clear.Size = UDim2.new(0.5, -5, 0, 30)
+clear.Position = UDim2.new(0.5, 5, 0, 80)
+clear.BackgroundColor3 = Color3.fromRGB(100,0,0)
+clear.Text = "🗑️ CLEAR"
+clear.TextColor3 = Color3.new(1,1,1)
+clear.Font = Enum.Font.GothamBold
+clear.TextSize = 12
+clear.Parent = frame
+
+local clearCorner = Instance.new("UICorner")
+clearCorner.CornerRadius = UDim.new(0, 6)
+clearCorner.Parent = clear
+
+execute.MouseButton1Click:Connect(function()
+    local script = textbox.Text
+    if script and script ~= "" then
+        local success, err = pcall(function() loadstring(script)() end)
+        if success then
+            game:GetService("StarterGui"):SetCore("SendNotification", { Title = "✅ Success", Text = "Script executed!", Duration = 1 })
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", { Title = "❌ Error", Text = tostring(err):sub(1,30), Duration = 2 })
+        end
+    end
+end)
+
+clear.MouseButton1Click:Connect(function()
+    textbox.Text = ""
+end)
