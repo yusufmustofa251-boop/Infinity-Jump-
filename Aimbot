@@ -1,0 +1,289 @@
+--[[
+    FREEMIUM AIMBOT ULTIMATE
+    Fitur: Aimbot 360°, ESP, Kill Aura, Auto Sword, Speed, Fly, God Mode
+]]
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local VirtualUser = game:GetService("VirtualUser")
+
+local Settings = {
+    Aimbot = { Enabled = false, Radius = 10000, Smooth = 0.1 },
+    Triggerbot = { Enabled = false, Delay = 0.05 },
+    ESP = { Enabled = false },
+    KillAura = { Enabled = false, Radius = 500, Damage = 999999 },
+    AutoSword = { Enabled = false, Cooldown = 0.1 },
+    Speed = { Enabled = false, Value = 200 },
+    InfinityJump = { Enabled = false },
+    Fly = { Enabled = false },
+    GodMode = { Enabled = false }
+}
+
+local CurrentTarget = nil
+local CanShoot = false
+local LastShot = 0
+local LastKillAura = 0
+local LastSword = 0
+local ESPObjects = {}
+
+local function IsVisible(player)
+    if not player or not player.Character then return false end
+    local head = player.Character:FindFirstChild("Head")
+    local root = player.Character:FindFirstChild("HumanoidRootPart")
+    local target = head or root
+    if not target then return false end
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    local ray = Ray.new(Camera.CFrame.Position, (target.Position - Camera.CFrame.Position).Unit * 1000)
+    local hit = workspace:FindPartOnRayWithIgnoreList(ray, {myChar, player.Character})
+    return hit == nil
+end
+
+local function GetLockedTarget()
+    if CurrentTarget and CurrentTarget.Character then
+        local hum = CurrentTarget.Character:FindFirstChild("Humanoid")
+        if hum and hum.Health > 0 then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local targetRoot = CurrentTarget.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot and targetRoot then
+                local dist = (targetRoot.Position - myRoot.Position).Magnitude
+                if dist <= Settings.Aimbot.Radius then return CurrentTarget end
+            end
+        end
+    end
+    local myChar = LocalPlayer.Character
+    if not myChar then return nil end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local hum = player.Character:FindFirstChild("Humanoid")
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and root then
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist <= Settings.Aimbot.Radius and IsVisible(player) then
+                    return player
+                end
+            end
+        end
+    end
+    return nil
+end
+
+RunService.RenderStepped:Connect(function()
+    if not Settings.Aimbot.Enabled then CurrentTarget = nil; return end
+    local target = GetLockedTarget()
+    if target then
+        CurrentTarget = target
+        CanShoot = IsVisible(target)
+        local targetPart = target.Character:FindFirstChild("Head") or target.Character:FindFirstChild("HumanoidRootPart")
+        if targetPart then
+            local targetPos = targetPart.Position + Vector3.new(0,0.5,0)
+            local dir = (targetPos - Camera.CFrame.Position).Unit
+            local smooth = Camera.CFrame.LookVector:Lerp(dir, Settings.Aimbot.Smooth)
+            Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, Camera.CFrame.Position + smooth)
+        end
+    else
+        CurrentTarget = nil; CanShoot = false
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if Settings.Triggerbot.Enabled and CanShoot and CurrentTarget then
+        local now = tick()
+        if now - LastShot >= Settings.Triggerbot.Delay then
+            pcall(function() mouse1click(); VirtualUser:ClickButton1(Vector2.new(0,0)) end)
+            LastShot = now
+        end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not Settings.KillAura.Enabled then return end
+    local now = tick()
+    if now - LastKillAura < 0.1 then return end
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local hum = player.Character:FindFirstChild("Humanoid")
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and root then
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist <= Settings.KillAura.Radius then
+                    hum.Health = hum.Health - Settings.KillAura.Damage
+                end
+            end
+        end
+    end
+    LastKillAura = now
+end)
+
+local function CreateESP(player)
+    if ESPObjects[player] then for _, obj in pairs(ESPObjects[player]) do pcall(obj.Remove, obj) end end
+    ESPObjects[player] = {
+        Box = Drawing.new("Square"),
+        Name = Drawing.new("Text"),
+        Status = Drawing.new("Text")
+    }
+    local e = ESPObjects[player]
+    e.Box.Visible = false; e.Box.Thickness = 2; e.Box.Filled = false
+    e.Name.Visible = false; e.Name.Center = true; e.Name.Outline = true; e.Name.Size = 16; e.Name.Color = Color3.new(1,1,1)
+    e.Status.Visible = false; e.Status.Center = true; e.Status.Outline = true; e.Status.Size = 12
+end
+
+RunService.RenderStepped:Connect(function()
+    if not Settings.ESP.Enabled then
+        for _, data in pairs(ESPObjects) do
+            if data.Box then data.Box.Visible = false end
+            if data.Name then data.Name.Visible = false end
+            if data.Status then data.Status.Visible = false end
+        end
+        return
+    end
+    for player, data in pairs(ESPObjects) do
+        if not player or not player.Character then
+            if data.Box then data.Box.Visible = false end
+            if data.Name then data.Name.Visible = false end
+            if data.Status then data.Status.Visible = false end
+        else
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local pos, onScreen = Camera:WorldToViewportPoint(root.Position)
+                local visible = IsVisible(player)
+                if onScreen then
+                    if data.Box then
+                        data.Box.Visible = true
+                        data.Box.Position = Vector2.new(pos.X-20, pos.Y-40)
+                        data.Box.Size = Vector2.new(40,80)
+                        if player == CurrentTarget then
+                            data.Box.Color = visible and Color3.new(0,1,0) or Color3.new(1,1,0)
+                            data.Box.Thickness = 3
+                        else
+                            data.Box.Color = visible and Color3.new(0,1,0) or Color3.new(1,0,0)
+                            data.Box.Thickness = 2
+                        end
+                    end
+                    if data.Name then
+                        data.Name.Visible = true
+                        data.Name.Position = Vector2.new(pos.X, pos.Y-55)
+                        data.Name.Text = player.Name
+                    end
+                    if data.Status and player == CurrentTarget then
+                        data.Status.Visible = true
+                        data.Status.Position = Vector2.new(pos.X, pos.Y-70)
+                        data.Status.Text = visible and "🔴 TEMBAK!" or "🟡 TERTUTUP"
+                        data.Status.Color = visible and Color3.new(1,0,0) or Color3.new(1,1,0)
+                    end
+                else
+                    if data.Box then data.Box.Visible = false end
+                    if data.Name then data.Name.Visible = false end
+                    if data.Status then data.Status.Visible = false end
+                end
+            end
+        end
+    end
+end)
+
+Players.PlayerAdded:Connect(function(p) if p~=LocalPlayer then CreateESP(p) end end)
+for _,p in pairs(Players:GetPlayers()) do if p~=LocalPlayer then CreateESP(p) end end
+
+spawn(function() while task.wait() do
+    if Settings.Speed.Enabled and LocalPlayer.Character then
+        local h = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if h then h.WalkSpeed = Settings.Speed.Value end
+    end
+end end)
+
+UserInputService.JumpRequest:Connect(function()
+    if Settings.InfinityJump.Enabled and LocalPlayer.Character then
+        local h = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+local BV, BG
+local function ToggleFly(e)
+    if e then
+        local c = LocalPlayer.Character
+        if not c then return end
+        local r = c:FindFirstChild("HumanoidRootPart")
+        local h = c:FindFirstChild("Humanoid")
+        if not r or not h then return end
+        h.PlatformStand = true
+        BV = Instance.new("BodyVelocity"); BV.Velocity = Vector3.new(0,0,0); BV.MaxForce = Vector3.new(4000,4000,4000); BV.Parent = r
+        BG = Instance.new("BodyGyro"); BG.MaxTorque = Vector3.new(4000,4000,4000); BG.Parent = r
+        spawn(function()
+            while Settings.Fly do
+                task.wait()
+                if not r or not BV then break end
+                local m = Vector3.new(0,0,0)
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then m = m + Camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then m = m - Camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then m = m - Camera.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then m = m + Camera.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then m = m + Vector3.new(0,1,0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then m = m + Vector3.new(0,-1,0) end
+                BV.Velocity = m.Magnitude>0 and m.Unit*50 or Vector3.new(0,0,0)
+                BG.CFrame = CFrame.new(r.Position, r.Position + Camera.CFrame.LookVector)
+            end
+        end)
+    else
+        if BV then BV:Destroy() end
+        if BG then BG:Destroy() end
+        BV,BG = nil,nil
+        if LocalPlayer.Character then
+            local h = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if h then h.PlatformStand = false end
+        end
+    end
+end
+
+spawn(function() while task.wait(0.1) do
+    if Settings.GodMode.Enabled and LocalPlayer.Character then
+        local h = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if h and h.Health>0 then h.Health = h.MaxHealth end
+    end
+end end)
+
+local Window = Rayfield:CreateWindow({
+    Name = "✨ FREEMIUM AIMBOT",
+    LoadingTitle = "Loading Aimbot...",
+    LoadingSubtitle = "Ultimate Edition",
+    ConfigurationSaving = { Enabled = true, FolderName = "FreemiumAimbot", FileName = "Settings" },
+    KeySystem = false
+})
+
+local AimbotTab = Window:CreateTab("🎯 Aimbot", 4483362458)
+AimbotTab:CreateSection("Aimbot Settings")
+AimbotTab:CreateToggle({ Name = "Enable Aimbot", CurrentValue = false, Flag = "AimbotToggle", Callback = function(v) Settings.Aimbot.Enabled = v end })
+AimbotTab:CreateSlider({ Name = "Radius", Range = {100, 10000}, Increment = 100, Suffix = " studs", CurrentValue = 10000, Flag = "AimbotRadius", Callback = function(v) Settings.Aimbot.Radius = v end })
+AimbotTab:CreateSlider({ Name = "Smoothness", Range = {0.1, 0.5}, Increment = 0.05, Suffix = "", CurrentValue = 0.1, Flag = "AimbotSmooth", Callback = function(v) Settings.Aimbot.Smooth = v end })
+AimbotTab:CreateToggle({ Name = "Enable Triggerbot", CurrentValue = false, Flag = "TriggerToggle", Callback = function(v) Settings.Triggerbot.Enabled = v end })
+
+local ESPTab = Window:CreateTab("👁️ ESP", 4483362458)
+ESPTab:CreateSection("ESP Settings")
+ESPTab:CreateToggle({ Name = "Enable ESP", CurrentValue = false, Flag = "ESPToggle", Callback = function(v) Settings.ESP.Enabled = v end })
+ESPTab:CreateParagraph({ Title = "Status Box", Content = "🔴 TEMBAK! = Target visible\n🟡 TERTUTUP = Target terhalang" })
+
+local CombatTab = Window:CreateTab("⚔️ Combat", 4483362458)
+CombatTab:CreateSection("Kill Aura")
+CombatTab:CreateToggle({ Name = "Enable Kill Aura", CurrentValue = false, Flag = "KillAuraToggle", Callback = function(v) Settings.KillAura.Enabled = v end })
+CombatTab:CreateSlider({ Name = "Radius", Range = {100, 5000}, Increment = 100, Suffix = " studs", CurrentValue = 500, Flag = "KillAuraRadius", Callback = function(v) Settings.KillAura.Radius = v end })
+CombatTab:CreateSlider({ Name = "Damage", Range = {100, 999999}, Increment = 1000, Suffix = " dmg", CurrentValue = 999999, Flag = "KillAuraDamage", Callback = function(v) Settings.KillAura.Damage = v end })
+CombatTab:CreateToggle({ Name = "Auto Sword", CurrentValue = false, Flag = "SwordToggle", Callback = function(v) Settings.AutoSword.Enabled = v end })
+
+local FunTab = Window:CreateTab("🎮 Fun", 4483362458)
+FunTab:CreateSection("Fun Features")
+FunTab:CreateToggle({ Name = "Speed 200", CurrentValue = false, Flag = "SpeedToggle", Callback = function(v) Settings.Speed.Enabled = v end })
+FunTab:CreateToggle({ Name = "Infinity Jump", CurrentValue = false, Flag = "JumpToggle", Callback = function(v) Settings.InfinityJump.Enabled = v end })
+FunTab:CreateToggle({ Name = "Fly", CurrentValue = false, Flag = "FlyToggle", Callback = function(v) Settings.Fly = v; ToggleFly(v) end })
+FunTab:CreateToggle({ Name = "God Mode", CurrentValue = false, Flag = "GodToggle", Callback = function(v) Settings.GodMode.Enabled = v end })
+
+Rayfield:Notify({ Title = "✨ AIMBOT READY", Content = "Loaded!", Duration = 2 })
