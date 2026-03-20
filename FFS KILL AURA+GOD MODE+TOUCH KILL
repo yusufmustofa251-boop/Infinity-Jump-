@@ -1,0 +1,381 @@
+--[[
+    FFS EXECUTOR HUB – Load Kill All, God Mode, Touch Kill
+    By Brian
+]]
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
+-- ==================== KILL ALL SCRIPT ====================
+local killAllScript = [[
+--[[ KILL ALL (Unlimited, Instant) ]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local killAllEnabled = false
+local lastKillTime = 0
+local KILL_ALL_COOLDOWN = 0.001
+local KILL_RADIUS = 1e6
+
+local function instantKill(player)
+    if not player or player == LocalPlayer then return end
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if hum then hum.Health = 0 end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then root.CFrame = CFrame.new(0, -500, 0) end
+end
+
+RunService.RenderStepped:Connect(function()
+    if not killAllEnabled then return end
+    local now = tick()
+    if now - lastKillTime < KILL_ALL_COOLDOWN then return end
+    lastKillTime = now
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local char = plr.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local dist = (char.HumanoidRootPart.Position - myRoot.Position).Magnitude
+                if dist <= KILL_RADIUS then
+                    instantKill(plr)
+                end
+            end
+        end
+    end
+end)
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "KillAllWindow"
+gui.Parent = game:GetService("CoreGui")
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 80)
+frame.Position = UDim2.new(0.5, -110, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+frame.BackgroundTransparency = 0.2
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -20, 0, 25)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "💀 KILL ALL"
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(1, -20, 0, 35)
+toggle.Position = UDim2.new(0, 10, 0, 35)
+toggle.BackgroundColor3 = Color3.fromRGB(100,0,0)
+toggle.Text = "🔴 OFF"
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextScaled = true
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
+
+local sizeBtn = Instance.new("TextButton", frame)
+sizeBtn.Size = UDim2.new(0.3, 0, 0, 20)
+sizeBtn.Position = UDim2.new(0.6, 0, 1, -25)
+sizeBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+sizeBtn.Text = "Size"
+sizeBtn.TextColor3 = Color3.new(1,1,1)
+sizeBtn.Font = Enum.Font.Gotham
+sizeBtn.TextSize = 12
+sizeBtn.TextScaled = true
+Instance.new("UICorner", sizeBtn).CornerRadius = UDim.new(0, 6)
+
+local sizes = {"Small","Medium","Large"}
+local sizeIdx = 2
+local function setSize(idx)
+    if idx == 1 then frame.Size = UDim2.new(0,180,0,70)
+    elseif idx == 2 then frame.Size = UDim2.new(0,220,0,80)
+    else frame.Size = UDim2.new(0,280,0,90) end
+    sizeBtn.Text = sizes[idx]
+    sizeIdx = idx
+end
+setSize(2)
+sizeBtn.MouseButton1Click:Connect(function() setSize(sizeIdx%3+1) end)
+
+local enabled = false
+toggle.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    toggle.Text = enabled and "🟢 ON" or "🔴 OFF"
+    toggle.BackgroundColor3 = enabled and Color3.fromRGB(0,100,0) or Color3.fromRGB(100,0,0)
+    killAllEnabled = enabled
+end)
+
+print("✅ Kill All loaded")
+]]
+
+-- ==================== GOD MODE SCRIPT ====================
+local godModeScript = [[
+--[[ GOD MODE (Instant Full Health) ]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local godEnabled = false
+
+spawn(function()
+    while true do
+        task.wait(0.01)
+        if godEnabled then
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then
+                    if hum.Health < hum.MaxHealth then
+                        hum.Health = hum.MaxHealth
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "GodModeWindow"
+gui.Parent = game:GetService("CoreGui")
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 80)
+frame.Position = UDim2.new(0.5, -110, 0.32, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+frame.BackgroundTransparency = 0.2
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -20, 0, 25)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "👼 GOD MODE"
+title.TextColor3 = Color3.fromRGB(0,255,0)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(1, -20, 0, 35)
+toggle.Position = UDim2.new(0, 10, 0, 35)
+toggle.BackgroundColor3 = Color3.fromRGB(100,0,100)
+toggle.Text = "🔴 OFF"
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextScaled = true
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
+
+local sizeBtn = Instance.new("TextButton", frame)
+sizeBtn.Size = UDim2.new(0.3, 0, 0, 20)
+sizeBtn.Position = UDim2.new(0.6, 0, 1, -25)
+sizeBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+sizeBtn.Text = "Size"
+sizeBtn.TextColor3 = Color3.new(1,1,1)
+sizeBtn.Font = Enum.Font.Gotham
+sizeBtn.TextSize = 12
+sizeBtn.TextScaled = true
+Instance.new("UICorner", sizeBtn).CornerRadius = UDim.new(0, 6)
+
+local sizes = {"Small","Medium","Large"}
+local sizeIdx = 2
+local function setSize(idx)
+    if idx == 1 then frame.Size = UDim2.new(0,180,0,70)
+    elseif idx == 2 then frame.Size = UDim2.new(0,220,0,80)
+    else frame.Size = UDim2.new(0,280,0,90) end
+    sizeBtn.Text = sizes[idx]
+    sizeIdx = idx
+end
+setSize(2)
+sizeBtn.MouseButton1Click:Connect(function() setSize(sizeIdx%3+1) end)
+
+local enabled = false
+toggle.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    toggle.Text = enabled and "🟢 ON" or "🔴 OFF"
+    toggle.BackgroundColor3 = enabled and Color3.fromRGB(0,100,0) or Color3.fromRGB(100,0,100)
+    godEnabled = enabled
+end)
+
+print("✅ God Mode loaded")
+]]
+
+-- ==================== TOUCH KILL SCRIPT ====================
+local touchKillScript = [[
+--[[ TOUCH KILL (Instant on touch) ]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local touchEnabled = false
+local lastTouchTime = 0
+local TOUCH_COOLDOWN = 0.01
+local touchConnections = {}
+
+local function instantKill(player)
+    if not player or player == LocalPlayer then return end
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if hum then hum.Health = 0 end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then root.CFrame = CFrame.new(0, -500, 0) end
+end
+
+local function onTouch(part)
+    if not touchEnabled then return end
+    local now = tick()
+    if now - lastTouchTime < TOUCH_COOLDOWN then return end
+    lastTouchTime = now
+    local otherChar = part:FindFirstAncestorOfClass("Model")
+    if not otherChar then return end
+    local player = Players:GetPlayerFromCharacter(otherChar)
+    if player then instantKill(player) end
+end
+
+local function connectTouches()
+    for _, conn in ipairs(touchConnections) do conn:Disconnect() end
+    touchConnections = {}
+    local char = LocalPlayer.Character
+    if not char then return end
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            local conn = part.Touched:Connect(onTouch)
+            table.insert(touchConnections, conn)
+        end
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    if touchEnabled then task.wait(0.5); connectTouches() end
+end)
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TouchKillWindow"
+gui.Parent = game:GetService("CoreGui")
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 80)
+frame.Position = UDim2.new(0.5, -110, 0.44, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+frame.BackgroundTransparency = 0.2
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -20, 0, 25)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "✋ TOUCH KILL"
+title.TextColor3 = Color3.fromRGB(255,165,0)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(1, -20, 0, 35)
+toggle.Position = UDim2.new(0, 10, 0, 35)
+toggle.BackgroundColor3 = Color3.fromRGB(100,0,0)
+toggle.Text = "🔴 OFF"
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextScaled = true
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
+
+local sizeBtn = Instance.new("TextButton", frame)
+sizeBtn.Size = UDim2.new(0.3, 0, 0, 20)
+sizeBtn.Position = UDim2.new(0.6, 0, 1, -25)
+sizeBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+sizeBtn.Text = "Size"
+sizeBtn.TextColor3 = Color3.new(1,1,1)
+sizeBtn.Font = Enum.Font.Gotham
+sizeBtn.TextSize = 12
+sizeBtn.TextScaled = true
+Instance.new("UICorner", sizeBtn).CornerRadius = UDim.new(0, 6)
+
+local sizes = {"Small","Medium","Large"}
+local sizeIdx = 2
+local function setSize(idx)
+    if idx == 1 then frame.Size = UDim2.new(0,180,0,70)
+    elseif idx == 2 then frame.Size = UDim2.new(0,220,0,80)
+    else frame.Size = UDim2.new(0,280,0,90) end
+    sizeBtn.Text = sizes[idx]
+    sizeIdx = idx
+end
+setSize(2)
+sizeBtn.MouseButton1Click:Connect(function() setSize(sizeIdx%3+1) end)
+
+local enabled = false
+toggle.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    toggle.Text = enabled and "🟢 ON" or "🔴 OFF"
+    toggle.BackgroundColor3 = enabled and Color3.fromRGB(0,100,0) or Color3.fromRGB(100,0,0)
+    touchEnabled = enabled
+    if enabled then connectTouches()
+    else for _, conn in ipairs(touchConnections) do conn:Disconnect() end; touchConnections = {} end
+end)
+
+print("✅ Touch Kill loaded")
+]]
+
+-- ==================== MAIN HUB GUI ====================
+local mainGui = Instance.new("ScreenGui")
+mainGui.Name = "FFS_Executor_Hub"
+mainGui.Parent = game:GetService("CoreGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 150)
+mainFrame.Position = UDim2.new(0.5, -150, 0.1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = mainGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
+
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1, -20, 0, 30)
+titleLabel.Position = UDim2.new(0, 10, 0, 5)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "FFS EXECUTOR HUB"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 18
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local function createLoadButton(name, color, yPos, scriptString)
+    local btn = Instance.new("TextButton", mainFrame)
+    btn.Size = UDim2.new(1, -20, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, yPos)
+    btn.BackgroundColor3 = color
+    btn.Text = name
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextScaled = true
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.MouseButton1Click:Connect(function()
+        pcall(function() loadstring(scriptString)() end)
+        StarterGui:SetCore("SendNotification", { Title = "✅ Loaded", Text = name .. " loaded!", Duration = 2 })
+    end)
+end
+
+createLoadButton("💀 LOAD KILL ALL", Color3.fromRGB(100, 0, 0), 40, killAllScript)
+createLoadButton("👼 LOAD GOD MODE", Color3.fromRGB(100, 0, 100), 80, godModeScript)
+createLoadButton("✋ LOAD TOUCH KILL", Color3.fromRGB(0, 100, 0), 120, touchKillScript)
+
+print("✅ FFS Executor Hub Loaded. Click buttons to load features.")
