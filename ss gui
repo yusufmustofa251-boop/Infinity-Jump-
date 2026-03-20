@@ -1,0 +1,183 @@
+--[[
+    SERVERSIDE EXECUTOR - UNGU
+    Fitur: Backdoor Inject + Loadstring
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ServersideExec"
+gui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 280, 0, 160)
+frame.Position = UDim2.new(1, -290, 1, -170)
+frame.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -10, 0, 25)
+title.Position = UDim2.new(0, 5, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "⚡ SERVERSIDE EXECUTOR"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+local textbox = Instance.new("TextBox")
+textbox.Size = UDim2.new(1, -20, 0, 50)
+textbox.Position = UDim2.new(0, 10, 0, 35)
+textbox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+textbox.TextColor3 = Color3.new(0,255,0)
+textbox.PlaceholderText = "Script for server..."
+textbox.Font = Enum.Font.Code
+textbox.TextSize = 12
+textbox.TextXAlignment = Enum.TextXAlignment.Left
+textbox.TextYAlignment = Enum.TextYAlignment.Top
+textbox.MultiLine = true
+textbox.ClearTextOnFocus = false
+textbox.Parent = frame
+
+local textCorner = Instance.new("UICorner")
+textCorner.CornerRadius = UDim.new(0, 6)
+textCorner.Parent = textbox
+
+-- Backdoor status
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(0.5, -5, 0, 20)
+status.Position = UDim2.new(0, 10, 0, 95)
+status.BackgroundTransparency = 1
+status.Text = "🔍 Scanning..."
+status.TextColor3 = Color3.new(1,1,0)
+status.Font = Enum.Font.Gotham
+status.TextSize = 10
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = frame
+
+-- Scan backdoor function
+local backdoors = {}
+local function ScanBackdoor()
+    backdoors = {}
+    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+        if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+            if obj.Name:lower():find("admin") or obj.Name:lower():find("kick") or obj.Name:lower():find("ban") or obj.Name:lower():find("execute") then
+                table.insert(backdoors, obj)
+            end
+        end
+    end
+    if #backdoors > 0 then
+        status.Text = "✅ " .. #backdoors .. " backdoor(s) found"
+        status.TextColor3 = Color3.new(0,1,0)
+    else
+        status.Text = "❌ No backdoor found"
+        status.TextColor3 = Color3.new(1,0,0)
+    end
+end
+ScanBackdoor()
+
+-- Inject button
+local inject = Instance.new("TextButton")
+inject.Size = UDim2.new(0.5, -5, 0, 25)
+inject.Position = UDim2.new(0, 10, 0, 120)
+inject.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+inject.Text = "💉 INJECT"
+inject.TextColor3 = Color3.new(0,0,0)
+inject.Font = Enum.Font.GothamBold
+inject.TextSize = 12
+inject.Parent = frame
+
+local injectCorner = Instance.new("UICorner")
+injectCorner.CornerRadius = UDim.new(0, 6)
+injectCorner.Parent = inject
+
+-- Execute button
+local execBtn = Instance.new("TextButton")
+execBtn.Size = UDim2.new(0.5, -5, 0, 25)
+execBtn.Position = UDim2.new(0.5, 5, 0, 120)
+execBtn.BackgroundColor3 = Color3.fromRGB(100,0,100)
+execBtn.Text = "▶️ EXECUTE"
+execBtn.TextColor3 = Color3.new(1,1,1)
+execBtn.Font = Enum.Font.GothamBold
+execBtn.TextSize = 12
+execBtn.Parent = frame
+
+local execCorner = Instance.new("UICorner")
+execCorner.CornerRadius = UDim.new(0, 6)
+execCorner.Parent = execBtn
+
+-- Rescan button (small)
+local rescan = Instance.new("TextButton")
+rescan.Size = UDim2.new(0.3, 0, 0, 20)
+rescan.Position = UDim2.new(0.7, -10, 0, 95)
+rescan.BackgroundColor3 = Color3.fromRGB(80,80,80)
+rescan.Text = "↻"
+rescan.TextColor3 = Color3.new(1,1,1)
+rescan.Font = Enum.Font.GothamBold
+rescan.TextSize = 12
+rescan.Parent = frame
+
+local rescanCorner = Instance.new("UICorner")
+rescanCorner.CornerRadius = UDim.new(0, 4)
+rescanCorner.Parent = rescan
+
+inject.MouseButton1Click:Connect(function()
+    if #backdoors == 0 then
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "❌ Inject", Text = "No backdoor to inject", Duration = 2 })
+        return
+    end
+    local testScript = textbox.Text ~= "" and textbox.Text or "print('Injected from Freemium')"
+    for _, bd in ipairs(backdoors) do
+        pcall(function()
+            if bd:IsA("RemoteEvent") then
+                bd:FireServer(testScript)
+            elseif bd:IsA("RemoteFunction") then
+                bd:InvokeServer(testScript)
+            end
+        end)
+    end
+    game:GetService("StarterGui"):SetCore("SendNotification", { Title = "✅ Inject", Text = "Injected to " .. #backdoors .. " backdoor(s)", Duration = 2 })
+end)
+
+execBtn.MouseButton1Click:Connect(function()
+    local script = textbox.Text
+    if script == "" then return end
+    if #backdoors == 0 then
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "❌ Error", Text = "No backdoor found", Duration = 2 })
+        return
+    end
+    local success = false
+    for _, bd in ipairs(backdoors) do
+        pcall(function()
+            if bd:IsA("RemoteEvent") then
+                bd:FireServer(script)
+                success = true
+            elseif bd:IsA("RemoteFunction") then
+                bd:InvokeServer(script)
+                success = true
+            end
+        end)
+    end
+    if success then
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "✅ Server", Text = "Script executed!", Duration = 2 })
+    else
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "❌ Server", Text = "Execution failed", Duration = 2 })
+    end
+end)
+
+rescan.MouseButton1Click:Connect(function()
+    status.Text = "🔍 Scanning..."
+    status.TextColor3 = Color3.new(1,1,0)
+    task.wait(0.5)
+    ScanBackdoor()
+end)
