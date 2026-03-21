@@ -1,0 +1,201 @@
+-- Ultimate Kill All + Auto Kill Respawn (0 Detik Cooldown)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
+-- ==================== LOADING SCREEN ====================
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "LoadingScreen"
+loadingGui.Parent = game:GetService("CoreGui")
+
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(0, 400, 0, 160)
+loadingFrame.Position = UDim2.new(0.5, -200, 0.5, -80)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+loadingFrame.Parent = loadingGui
+Instance.new("UICorner", loadingFrame).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", loadingFrame)
+title.Size = UDim2.new(1, -20, 0, 50)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "Made by Brian"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBlack
+title.TextScaled = true
+
+local sub = Instance.new("TextLabel", loadingFrame)
+sub.Size = UDim2.new(1, -20, 0, 40)
+sub.Position = UDim2.new(0, 10, 0, 60)
+sub.BackgroundTransparency = 1
+sub.Text = "Loading Ultimate Kill System..."
+sub.TextColor3 = Color3.new(1,1,1)
+sub.Font = Enum.Font.Gotham
+sub.TextScaled = true
+
+local barBack = Instance.new("Frame", loadingFrame)
+barBack.Size = UDim2.new(1, -41, 0, 20)
+barBack.Position = UDim2.new(0, 20, 0.75, 0)
+barBack.BackgroundColor3 = Color3.fromRGB(50,50,50)
+Instance.new("UICorner", barBack).CornerRadius = UDim.new(0, 8)
+
+local barFill = Instance.new("Frame", barBack)
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 8)
+
+for i = 1, 100 do
+    barFill.Size = UDim2.new(i/100, 0, 1, 0)
+    task.wait(0.025)
+end
+
+for i = 0, 1, 0.05 do
+    loadingFrame.BackgroundTransparency = i
+    title.TextTransparency = i
+    sub.TextTransparency = i
+    barBack.BackgroundTransparency = i
+    barFill.BackgroundTransparency = i
+    task.wait()
+end
+loadingGui:Destroy()
+
+-- ==================== KILL FUNCTIONS ====================
+local function killPlayer(player)
+    if not player or player == LocalPlayer then return end
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if hum then
+        hum.Health = 0
+    end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then
+        root.CFrame = CFrame.new(0, -500, 0)
+    end
+end
+
+-- ==================== GUI 1: KILL ALL ====================
+local gui1 = Instance.new("ScreenGui")
+gui1.Name = "KillAllGUI"
+gui1.Parent = game:GetService("CoreGui")
+
+local frame1 = Instance.new("Frame")
+frame1.Size = UDim2.new(0, 250, 0, 90)
+frame1.Position = UDim2.new(0.5, -125, 0.5, -150)
+frame1.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame1.Active = true
+frame1.Draggable = true
+frame1.Parent = gui1
+Instance.new("UICorner", frame1).CornerRadius = UDim.new(0, 10)
+
+local btn1 = Instance.new("TextButton", frame1)
+btn1.Size = UDim2.new(1, -20, 0, 50)
+btn1.Position = UDim2.new(0, 10, 0, 10)
+btn1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+btn1.TextColor3 = Color3.fromRGB(255, 0, 0)
+btn1.Font = Enum.Font.GothamBold
+btn1.TextScaled = true
+btn1.Text = "💀 KILL ALL: OFF"
+Instance.new("UICorner", btn1).CornerRadius = UDim.new(0, 8)
+
+local credit1 = Instance.new("TextLabel", frame1)
+credit1.Size = UDim2.new(1, -20, 0, 20)
+credit1.Position = UDim2.new(0, 10, 0, 65)
+credit1.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+credit1.Text = "Made by Brian"
+credit1.TextColor3 = Color3.fromRGB(255, 255, 255)
+credit1.TextScaled = true
+credit1.Font = Enum.Font.Gotham
+Instance.new("UICorner", credit1).CornerRadius = UDim.new(0, 6)
+
+local killAllEnabled = false
+
+btn1.MouseButton1Click:Connect(function()
+    killAllEnabled = not killAllEnabled
+    btn1.Text = killAllEnabled and "💀 KILL ALL: ON" or "💀 KILL ALL: OFF"
+    btn1.TextColor3 = killAllEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+end)
+
+-- Kill All Loop
+RunService.RenderStepped:Connect(function()
+    if not killAllEnabled then return end
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local char = plr.Character
+            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+                killPlayer(plr)
+            end
+        end
+    end
+end)
+
+-- ==================== GUI 2: AUTO KILL RESPAWN ====================
+local gui2 = Instance.new("ScreenGui")
+gui2.Name = "AutoRespawnGUI"
+gui2.Parent = game:GetService("CoreGui")
+
+local frame2 = Instance.new("Frame")
+frame2.Size = UDim2.new(0, 250, 0, 90)
+frame2.Position = UDim2.new(0.5, -125, 0.5, -50)
+frame2.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame2.Active = true
+frame2.Draggable = true
+frame2.Parent = gui2
+Instance.new("UICorner", frame2).CornerRadius = UDim.new(0, 10)
+
+local btn2 = Instance.new("TextButton", frame2)
+btn2.Size = UDim2.new(1, -20, 0, 50)
+btn2.Position = UDim2.new(0, 10, 0, 10)
+btn2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+btn2.TextColor3 = Color3.fromRGB(255, 0, 0)
+btn2.Font = Enum.Font.GothamBold
+btn2.TextScaled = true
+btn2.Text = "🔄 AUTO KILL RESPAWN: OFF"
+Instance.new("UICorner", btn2).CornerRadius = UDim.new(0, 8)
+
+local credit2 = Instance.new("TextLabel", frame2)
+credit2.Size = UDim2.new(1, -20, 0, 20)
+credit2.Position = UDim2.new(0, 10, 0, 65)
+credit2.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+credit2.Text = "Made by Brian"
+credit2.TextColor3 = Color3.fromRGB(255, 255, 255)
+credit2.TextScaled = true
+credit2.Font = Enum.Font.Gotham
+Instance.new("UICorner", credit2).CornerRadius = UDim.new(0, 6)
+
+local autoRespawnEnabled = false
+
+-- Track killed players to prevent spam kill
+local killedPlayers = {}
+
+btn2.MouseButton1Click:Connect(function()
+    autoRespawnEnabled = not autoRespawnEnabled
+    btn2.Text = autoRespawnEnabled and "🔄 AUTO KILL RESPAWN: ON" or "🔄 AUTO KILL RESPAWN: OFF"
+    btn2.TextColor3 = autoRespawnEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    
+    if autoRespawnEnabled then
+        killedPlayers = {}
+    end
+end)
+
+-- Auto Kill Respawn Loop (0 detik cooldown)
+RunService.RenderStepped:Connect(function()
+    if not autoRespawnEnabled then return end
+    
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local char = plr.Character
+            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                local hum = char.Humanoid
+                if hum.Health > 0 then
+                    -- Kill immediately on respawn
+                    killPlayer(plr)
+                end
+            end
+        end
+    end
+end)
+
+StarterGui:SetCore("SendNotification", { Title = "✅ Ultimate Kill System", Text = "2 GUIs Ready! Kill All + Auto Respawn", Duration = 4 })
+print("✅ Ultimate Kill System Loaded")
