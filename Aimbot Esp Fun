@@ -1,0 +1,59 @@
+-- Rayfield Aimbot
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local Settings = {
+    Aimbot = { Enabled = false, Radius = 500, Smooth = 0.2 },
+    ESP = { Enabled = false }
+}
+
+local currentTarget = nil
+local espObjects = {}
+
+-- Functions
+local function IsVisible(player)
+    if not player or not player.Character then return false end
+    local part = player.Character:FindFirstChild("Head") or player.Character:FindFirstChild("HumanoidRootPart")
+    if not part then return false end
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    local ray = Ray.new(Camera.CFrame.Position, (part.Position - Camera.CFrame.Position).Unit * 1000)
+    local hit = workspace:FindPartOnRayWithIgnoreList(ray, {myChar, player.Character})
+    return hit == nil
+end
+
+local function GetBestTarget()
+    local myChar = LocalPlayer.Character
+    if not myChar then return nil end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+    
+    local best = nil
+    local bestDist = math.huge
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local hum = player.Character:FindFirstChild("Humanoid")
+            if hum and hum.Health > 0 then
+                local root = player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local dist = (root.Position - myRoot.Position).Magnitude
+                    if dist <= Settings.Aimbot.Radius and dist < bestDist then
+                        bestDist = dist
+                        best = player
+                    end
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- Aimbot Loop
+RunService.RenderStepped:Connect(function()
+    if not Settings.Aimbot.Enabled then return end
+    local target = Get
