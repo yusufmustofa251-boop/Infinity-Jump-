@@ -1,0 +1,407 @@
+-- c00lkidd Executor 2025
+-- Auto Username Fill | Loadstring | Require Executor
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+local username = LocalPlayer.Name
+
+-- ==================== CREATE GUI ====================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "c00lkiddExecutor"
+screenGui.Parent = game:GetService("CoreGui")
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+titleBar.Parent = mainFrame
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -50, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ c00lkidd Executor 2025"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.Parent = titleBar
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+
+-- ==================== USERNAME DISPLAY ====================
+local userFrame = Instance.new("Frame")
+userFrame.Size = UDim2.new(1, -20, 0, 35)
+userFrame.Position = UDim2.new(0, 10, 0, 45)
+userFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+userFrame.Parent = mainFrame
+Instance.new("UICorner", userFrame).CornerRadius = UDim.new(0, 6)
+
+local userLabel = Instance.new("TextLabel")
+userLabel.Size = UDim2.new(1, -20, 1, 0)
+userLabel.Position = UDim2.new(0, 10, 0, 0)
+userLabel.BackgroundTransparency = 1
+userLabel.Text = "👤 User: " .. username
+userLabel.TextColor3 = Color3.new(0, 255, 0)
+userLabel.Font = Enum.Font.GothamBold
+userLabel.TextSize = 14
+userLabel.TextXAlignment = Enum.TextXAlignment.Left
+userLabel.Parent = userFrame
+
+-- ==================== LOADSTRING BUTTONS ====================
+local loadFrame = Instance.new("Frame")
+loadFrame.Size = UDim2.new(1, -20, 0, 70)
+loadFrame.Position = UDim2.new(0, 10, 0, 90)
+loadFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+loadFrame.Parent = mainFrame
+Instance.new("UICorner", loadFrame).CornerRadius = UDim.new(0, 6)
+
+local loadTitle = Instance.new("TextLabel")
+loadTitle.Size = UDim2.new(1, -20, 0, 25)
+loadTitle.Position = UDim2.new(0, 10, 0, 5)
+loadTitle.BackgroundTransparency = 1
+loadTitle.Text = "📦 LOADSTRING SCRIPTS"
+loadTitle.TextColor3 = Color3.new(1, 1, 1)
+loadTitle.Font = Enum.Font.GothamBold
+loadTitle.TextSize = 12
+loadTitle.TextXAlignment = Enum.TextXAlignment.Left
+loadTitle.Parent = loadFrame
+
+-- Fly Button
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0.48, 0, 0, 30)
+flyBtn.Position = UDim2.new(0.02, 0, 0, 35)
+flyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+flyBtn.Text = "🕊️ FLY GUI"
+flyBtn.TextColor3 = Color3.new(1, 1, 1)
+flyBtn.Font = Enum.Font.GothamBold
+flyBtn.TextSize = 12
+flyBtn.Parent = loadFrame
+Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(0, 6)
+
+-- Invisible Button
+local invisibleBtn = Instance.new("TextButton")
+invisibleBtn.Size = UDim2.new(0.48, 0, 0, 30)
+invisibleBtn.Position = UDim2.new(0.5, 5, 0, 35)
+invisibleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+invisibleBtn.Text = "👻 INVISIBLE GUI"
+invisibleBtn.TextColor3 = Color3.new(1, 1, 1)
+invisibleBtn.Font = Enum.Font.GothamBold
+invisibleBtn.TextSize = 12
+invisibleBtn.Parent = loadFrame
+Instance.new("UICorner", invisibleBtn).CornerRadius = UDim.new(0, 6)
+
+-- Aimbot + ESP Button
+local aimbotBtn = Instance.new("TextButton")
+aimbotBtn.Size = UDim2.new(1, -20, 0, 30)
+aimbotBtn.Position = UDim2.new(0.02, 0, 0, 70)
+aimbotBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+aimbotBtn.Text = "🎯 AIMBOT + ESP (Rayfield)"
+aimbotBtn.TextColor3 = Color3.new(1, 1, 1)
+aimbotBtn.Font = Enum.Font.GothamBold
+aimbotBtn.TextSize = 12
+aimbotBtn.Parent = loadFrame
+Instance.new("UICorner", aimbotBtn).CornerRadius = UDim.new(0, 6)
+
+-- ==================== REQUIRE EXECUTOR AREA ====================
+local requireFrame = Instance.new("Frame")
+requireFrame.Size = UDim2.new(1, -20, 0, 120)
+requireFrame.Position = UDim2.new(0, 10, 0, 170)
+requireFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+requireFrame.Parent = mainFrame
+Instance.new("UICorner", requireFrame).CornerRadius = UDim.new(0, 6)
+
+local requireTitle = Instance.new("TextLabel")
+requireTitle.Size = UDim2.new(1, -20, 0, 25)
+requireTitle.Position = UDim2.new(0, 10, 0, 5)
+requireTitle.BackgroundTransparency = 1
+requireTitle.Text = "📜 REQUIRE EXECUTOR (Auto Fill Username)"
+requireTitle.TextColor3 = Color3.new(1, 1, 1)
+requireTitle.Font = Enum.Font.GothamBold
+requireTitle.TextSize = 12
+requireTitle.TextXAlignment = Enum.TextXAlignment.Left
+requireTitle.Parent = requireFrame
+
+local scriptBox = Instance.new("TextBox")
+scriptBox.Size = UDim2.new(1, -20, 0, 45)
+scriptBox.Position = UDim2.new(0, 10, 0, 30)
+scriptBox.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+scriptBox.TextColor3 = Color3.new(0, 255, 0)
+scriptBox.PlaceholderText = "require(1234567890):Fire('" .. username .. "')"
+scriptBox.Font = Enum.Font.Code
+scriptBox.TextSize = 12
+scriptBox.TextXAlignment = Enum.TextXAlignment.Left
+scriptBox.TextYAlignment = Enum.TextYAlignment.Top
+scriptBox.MultiLine = true
+scriptBox.ClearTextOnFocus = false
+scriptBox.Parent = requireFrame
+Instance.new("UICorner", scriptBox).CornerRadius = UDim.new(0, 6)
+
+local executeBtn = Instance.new("TextButton")
+executeBtn.Size = UDim2.new(0.48, 0, 0, 35)
+executeBtn.Position = UDim2.new(0.02, 0, 0, 80)
+executeBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+executeBtn.Text = "▶️ EXECUTE"
+executeBtn.TextColor3 = Color3.new(1, 1, 1)
+executeBtn.Font = Enum.Font.GothamBold
+executeBtn.TextSize = 14
+executeBtn.Parent = requireFrame
+Instance.new("UICorner", executeBtn).CornerRadius = UDim.new(0, 6)
+
+local clearBtn = Instance.new("TextButton")
+clearBtn.Size = UDim2.new(0.48, 0, 0, 35)
+clearBtn.Position = UDim2.new(0.5, 5, 0, 80)
+clearBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+clearBtn.Text = "🗑️ CLEAR"
+clearBtn.TextColor3 = Color3.new(1, 1, 1)
+clearBtn.Font = Enum.Font.GothamBold
+clearBtn.TextSize = 14
+clearBtn.Parent = requireFrame
+Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 6)
+
+-- ==================== STATUS ====================
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 25)
+statusLabel.Position = UDim2.new(0, 10, 0, 300)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Ready"
+statusLabel.TextColor3 = Color3.new(0, 255, 0)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 11
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = mainFrame
+
+-- ==================== FUNCTIONS ====================
+local function updateStatus(text, isError)
+    statusLabel.Text = text
+    statusLabel.TextColor3 = isError and Color3.new(1, 0, 0) or Color3.new(0, 255, 0)
+end
+
+local function executeScript(script)
+    if not script or script == "" then
+        updateStatus("❌ No script to execute", true)
+        return
+    end
+    local success, err = pcall(function()
+        loadstring(script)()
+    end)
+    if success then
+        updateStatus("✅ Script executed successfully!", false)
+    else
+        updateStatus("❌ Error: " .. tostring(err):sub(1, 60), true)
+    end
+end
+
+-- ==================== BUTTON ACTIONS ====================
+executeBtn.MouseButton1Click:Connect(function()
+    local script = scriptBox.Text
+    if script:find("YourNameHere") then
+        script = script:gsub("YourNameHere", username)
+    end
+    executeScript(script)
+end)
+
+clearBtn.MouseButton1Click:Connect(function()
+    scriptBox.Text = ""
+    updateStatus("Cleared", false)
+end)
+
+-- Loadstring Buttons
+flyBtn.MouseButton1Click:Connect(function()
+    executeScript('loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()')
+end)
+
+invisibleBtn.MouseButton1Click:Connect(function()
+    executeScript('loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./dbb6ce6f6cee4f7a5c9e20d7b88e83db2a93bf25/Invisible GUI"))()')
+end)
+
+aimbotBtn.MouseButton1Click:Connect(function()
+    executeScript([[
+        -- Aimbot + ESP (Rayfield)
+        local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local LocalPlayer = Players.LocalPlayer
+        local Camera = workspace.CurrentCamera
+        
+        local Settings = {
+            Aimbot = { Enabled = false, Radius = 500, Smooth = 0.2, Part = "Head" },
+            ESP = { Enabled = false }
+        }
+        
+        local currentTarget = nil
+        local espObjects = {}
+        
+        local function IsVisible(player)
+            if not player or not player.Character then return false end
+            local part = player.Character:FindFirstChild(Settings.Aimbot.Part) or player.Character:FindFirstChild("HumanoidRootPart")
+            if not part then return false end
+            local myChar = LocalPlayer.Character
+            if not myChar then return false end
+            local ray = Ray.new(Camera.CFrame.Position, (part.Position - Camera.CFrame.Position).Unit * 1000)
+            local hit = workspace:FindPartOnRayWithIgnoreList(ray, {myChar, player.Character})
+            return hit == nil
+        end
+        
+        local function GetBestTarget()
+            local myChar = LocalPlayer.Character
+            if not myChar then return nil end
+            local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+            if not myRoot then return nil end
+            local best = nil
+            local bestDist = math.huge
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    local hum = player.Character:FindFirstChild("Humanoid")
+                    if hum and hum.Health > 0 then
+                        local root = player.Character:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            local dist = (root.Position - myRoot.Position).Magnitude
+                            if dist <= Settings.Aimbot.Radius and dist < bestDist then
+                                bestDist = dist
+                                best = player
+                            end
+                        end
+                    end
+                end
+            end
+            return best
+        end
+        
+        RunService.RenderStepped:Connect(function()
+            if Settings.Aimbot.Enabled then
+                local target = GetBestTarget()
+                currentTarget = target
+                if target and target.Character then
+                    local part = target.Character:FindFirstChild(Settings.Aimbot.Part) or target.Character:FindFirstChild("HumanoidRootPart")
+                    if part then
+                        local targetPos = part.Position
+                        if Settings.Aimbot.Part == "Head" then targetPos = targetPos + Vector3.new(0,0.5,0)
+                        local dir = (targetPos - Camera.CFrame.Position).Unit
+                        local newCF = CFrame.lookAt(Camera.CFrame.Position, Camera.CFrame.Position + dir)
+                        Camera.CFrame = Camera.CFrame:Lerp(newCF, Settings.Aimbot.Smooth)
+                    end
+                end
+            end
+        end)
+        
+        local function CreateESP(player)
+            if espObjects[player] then
+                for _, obj in pairs(espObjects[player]) do pcall(obj.Remove, obj) end
+            end
+            espObjects[player] = {
+                Box = Drawing.new("Square"),
+                Name = Drawing.new("Text"),
+                Dist = Drawing.new("Text")
+            }
+            local e = espObjects[player]
+            e.Box.Visible = false; e.Box.Thickness = 2; e.Box.Filled = false
+            e.Name.Visible = false; e.Name.Center = true; e.Name.Outline = true; e.Name.Size = 16; e.Name.Color = Color3.new(1,1,1)
+            e.Dist.Visible = false; e.Dist.Center = true; e.Dist.Outline = true; e.Dist.Size = 14; e.Dist.Color = Color3.new(1,1,0)
+        end
+        
+        RunService.RenderStepped:Connect(function()
+            if not Settings.ESP.Enabled then
+                for _, data in pairs(espObjects) do
+                    if data.Box then data.Box.Visible = false end
+                    if data.Name then data.Name.Visible = false end
+                    if data.Dist then data.Dist.Visible = false end
+                end
+                return
+            end
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            for player, data in pairs(espObjects) do
+                if not player or not player.Character then
+                    if data.Box then data.Box.Visible = false end
+                    if data.Name then data.Name.Visible = false end
+                    if data.Dist then data.Dist.Visible = false end
+                else
+                    local root = player.Character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        local pos, on = Camera:WorldToViewportPoint(root.Position)
+                        if on then
+                            if data.Box then
+                                data.Box.Visible = true
+                                data.Box.Position = Vector2.new(pos.X-20, pos.Y-40)
+                                data.Box.Size = Vector2.new(40,80)
+                                data.Box.Color = player == currentTarget and Color3.new(0,1,0) or Color3.new(1,0,0)
+                                data.Box.Thickness = (player == currentTarget) and 3 or 2
+                            end
+                            if data.Name then
+                                data.Name.Visible = true
+                                data.Name.Position = Vector2.new(pos.X, pos.Y-55)
+                                data.Name.Text = player.Name
+                            end
+                            if data.Dist and myRoot then
+                                data.Dist.Visible = true
+                                data.Dist.Position = Vector2.new(pos.X, pos.Y+45)
+                                data.Dist.Text = string.format("%.0f", (root.Position - myRoot.Position).Magnitude)
+                            end
+                        else
+                            if data.Box then data.Box.Visible = false end
+                            if data.Name then data.Name.Visible = false end
+                            if data.Dist then data.Dist.Visible = false end
+                        end
+                    end
+                end
+            end
+        end)
+        
+        Players.PlayerAdded:Connect(function(p) if p ~= LocalPlayer then CreateESP(p) end end)
+        for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then CreateESP(p) end end
+        
+        local Window = Rayfield:CreateWindow({
+            Name = "🎯 AIMBOT + ESP",
+            LoadingTitle = "Loading...",
+            LoadingSubtitle = "c00lkidd Edition",
+            ConfigurationSaving = { Enabled = true, FolderName = "c00lkiddAimbot", FileName = "Settings" },
+            KeySystem = false
+        })
+        
+        local AimbotTab = Window:CreateTab("🎯 Aimbot", 4483362458)
+        AimbotTab:CreateSection("Aimbot Settings")
+        AimbotTab:CreateToggle({ Name = "Enable Aimbot", CurrentValue = false, Flag = "AimbotToggle", Callback = function(v) Settings.Aimbot.Enabled = v end })
+        AimbotTab:CreateSlider({ Name = "Radius", Range = {100, 10000}, Increment = 100, Suffix = " studs", CurrentValue = 500, Flag = "Radius", Callback = function(v) Settings.Aimbot.Radius = v end })
+        AimbotTab:CreateSlider({ Name = "Smoothness", Range = {0.05, 0.5}, Increment = 0.01, Suffix = "", CurrentValue = 0.2, Flag = "Smooth", Callback = function(v) Settings.Aimbot.Smooth = v end })
+        AimbotTab:CreateDropdown({ Name = "Target Part", Options = {"Head", "HumanoidRootPart"}, CurrentOption = "Head", Flag = "Part", Callback = function(v) Settings.Aimbot.Part = v end })
+        
+        local ESPTab = Window:CreateTab("👁️ ESP", 4483362458)
+        ESPTab:CreateSection("ESP Settings")
+        ESPTab:CreateToggle({ Name = "Enable ESP", CurrentValue = false, Flag = "ESPToggle", Callback = function(v) Settings.ESP.Enabled = v end })
+        ESPTab:CreateParagraph({ Title = "Warna Box", Content = "🟢 Hijau = Target | 🔴 Merah = Musuh" })
+        
+        Rayfield:Notify({ Title = "✅ Aimbot + ESP", Content = "Loaded!", Duration = 3 })
+    ]])
+end)
+
+-- Notifikasi
+StarterGui:SetCore("SendNotification", {
+    Title = "⚡ c00lkidd Executor 2025",
+    Text = "Ready! User: " .. username,
+    Duration = 4
+})
+
+print("✅ c00lkidd Executor 2025 Loaded - User: " .. username)
