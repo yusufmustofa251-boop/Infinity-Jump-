@@ -1,0 +1,157 @@
+-- Flashback Script (Seperti di screenshot)
+-- By Brian
+-- Fitur: Rekam posisi, flashback (mundur), stop, reset
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
+-- ================= VARIABLES =================
+local recording = true          -- apakah sedang merekam posisi
+local flashbackActive = false   -- apakah sedang dalam mode flashback
+local positionHistory = {}      -- daftar posisi (CFrame) yang direkam
+local maxHistory = 300           -- maksimal 300 frame (sekitar 5 detik jika 60fps)
+local recordInterval = 0.05     -- interval rekam (detik)
+local flashbackSpeed = 0.03     -- kecepatan mundur (detik antar posisi)
+local flashbackIndex = 1         -- index posisi saat flashback
+
+-- ================= GUI =================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FlashbackGUI"
+gui.ResetOnSpawn = false
+gui.Parent = game:GetService("CoreGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 120)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -60)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = gui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -10, 0, 30)
+title.Position = UDim2.new(0, 5, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "⏪ Flashback script ..."
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = mainFrame
+
+-- Tombol Stop Flashback
+local stopBtn = Instance.new("TextButton")
+stopBtn.Size = UDim2.new(0.45, 0, 0, 35)
+stopBtn.Position = UDim2.new(0.03, 0, 0, 45)
+stopBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+stopBtn.Text = "⏹️ Stop Flashback"
+stopBtn.TextColor3 = Color3.new(1,1,1)
+stopBtn.Font = Enum.Font.GothamBold
+stopBtn.TextSize = 12
+stopBtn.Parent = mainFrame
+Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 6)
+
+-- Tombol Reset
+local resetBtn = Instance.new("TextButton")
+resetBtn.Size = UDim2.new(0.45, 0, 0, 35)
+resetBtn.Position = UDim2.new(0.52, 0, 0, 45)
+resetBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 200)
+resetBtn.Text = "🔄 Reset"
+resetBtn.TextColor3 = Color3.new(1,1,1)
+resetBtn.Font = Enum.Font.GothamBold
+resetBtn.TextSize = 12
+resetBtn.Parent = mainFrame
+Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
+
+-- Label Status
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -10, 0, 20)
+statusLabel.Position = UDim2.new(0, 5, 0, 90)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: Recording"
+statusLabel.TextColor3 = Color3.new(0,255,0)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 11
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = mainFrame
+
+-- ================= FUNGSI =================
+local function recordPosition()
+    while recording do
+        task.wait(recordInterval)
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            table.insert(positionHistory, root.CFrame)
+            if #positionHistory > maxHistory then
+                table.remove(positionHistory, 1)
+            end
+        end
+    end
+end
+
+local function startFlashback()
+    if flashbackActive then return end
+    if #positionHistory == 0 then
+        StarterGui:SetCore("SendNotification", { Title = "Flashback", Text = "Tidak ada posisi yang direkam!", Duration = 2 })
+        return
+    end
+    flashbackActive = true
+    recording = false
+    statusLabel.Text = "Status: Flashback"
+    statusLabel.TextColor3 = Color3.new(255,255,0)
+
+    flashbackIndex = #positionHistory
+    local function flashbackLoop()
+        while flashbackActive and flashbackIndex > 1 do
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.CFrame = positionHistory[flashbackIndex]
+            end
+            flashbackIndex = flashbackIndex - 1
+            task.wait(flashbackSpeed)
+        end
+        if flashbackIndex <= 1 then
+            stopFlashback()
+        end
+    end
+    task.spawn(flashbackLoop)
+end
+
+local function stopFlashback()
+    flashbackActive = false
+    recording = true
+    statusLabel.Text = "Status: Recording"
+    statusLabel.TextColor3 = Color3.new(0,255,0)
+    -- Kosongkan history setelah flashback selesai? Opsi: tetap simpan atau reset? Biarkan tetap ada.
+end
+
+local function resetFlashback()
+    stopFlashback()
+    positionHistory = {}
+    flashbackIndex = 1
+    StarterGui:SetCore("SendNotification", { Title = "Flashback", Text = "Riwayat posisi direset", Duration = 2 })
+end
+
+-- ================= TOMBOL =================
+stopBtn.MouseButton1Click:Connect(function()
+    if flashbackActive then
+        stopFlashback()
+    else
+        startFlashback()
+    end
+end)
+
+resetBtn.MouseButton1Click:Connect(function()
+    resetFlashback()
+end)
+
+-- Mulai rekaman
+task.spawn(recordPosition)
+
+print("✅ Flashback script loaded")
