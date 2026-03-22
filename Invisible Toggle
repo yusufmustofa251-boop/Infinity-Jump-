@@ -1,0 +1,118 @@
+-- invisible toggle script
+
+
+-- Gui to Minecraft
+-- Version: 9/11
+
+-- Instances:
+
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local TextLabel = Instance.new("TextLabel")
+local TextButton = Instance.new("TextButton")
+
+--Properties:
+
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+print("SGui loaded!")
+
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(196, 40, 28)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.584415555, 0, 0.121844128, 0)
+Frame.Size = UDim2.new(0, 173, 0, 105)
+Frame.Active = true
+Frame.Draggable = true
+
+TextLabel.Parent = Frame
+TextLabel.BackgroundColor3 = Color3.fromRGB(13, 105, 172)
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Size = UDim2.new(0, 173, 0, 30)
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.Text = "Invisible toggle"
+TextLabel.TextColor3 = Color3.fromRGB(245, 205, 48)
+TextLabel.TextSize = 18.000
+
+TextButton.Parent = Frame
+TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0.161849707, 0, 0.419047624, 0)
+TextButton.Size = UDim2.new(0, 117, 0, 33)
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = "Click to become invisible"
+TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.TextSize = 14.000
+
+-- Scripts:
+
+local function GNXDSUT_fake_script() -- TextButton.LocalScript 
+	local script = Instance.new('LocalScript', TextButton)
+
+	local TextButton = script.Parent
+	local invis_on = false
+	
+	local function makeTransparent(character)
+		for _, part in ipairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.LocalTransparencyModifier = invis_on and 0.5 or 0
+			end
+		end
+	end
+	
+	local function toggleInvisibility()
+		invis_on = not invis_on
+		local player = game.Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+	
+		if invis_on then
+			local savedpos = character.HumanoidRootPart.CFrame
+			wait()
+			character:MoveTo(Vector3.new(-25.95, 84, 3537.55))
+			wait(0.15)
+	
+			local Seat = Instance.new('Seat', game.Workspace)
+			Seat.Anchored = false
+			Seat.CanCollide = false
+			Seat.Name = 'invischair'
+			Seat.Transparency = 1
+			Seat.Position = Vector3.new(-25.95, 84, 3537.55)
+	
+			local Weld = Instance.new("Weld", Seat)
+			Weld.Part0 = Seat
+			Weld.Part1 = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+			wait()
+	
+			Seat.CFrame = savedpos
+			TextButton.Text = "ON🛡️"
+		else
+			local invisChair = workspace:FindFirstChild('invischair')
+			if invisChair then
+				invisChair:Destroy()
+			end
+			TextButton.Text = "OFF🛑"
+		end
+	
+		makeTransparent(character)
+	end
+	
+	TextButton.MouseButton1Click:Connect(toggleInvisibility)
+	
+	game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+		makeTransparent(character)
+	end)
+	
+	wait(.69)
+	
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "loaded";
+		Text = "eeeeee";
+		Duration = 6;
+	})
+end
+coroutine.wrap(GNXDSUT_fake_script)()
+print("script loaded!")
