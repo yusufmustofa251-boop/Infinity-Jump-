@@ -1,0 +1,44 @@
+-- [[ LUNAR V13: VIP LOADER ]]
+-- Owner: Boss Tajir LUNAR
+-- Status: PROTECTED
+
+-- 1. Loading Visual (Bintang Kedap-Kedip)
+local sg = Instance.new("ScreenGui", game.CoreGui)
+local f = Instance.new("Frame", sg)
+f.Size = UDim2.new(1,0,1,0)
+f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+local l = Instance.new("TextLabel", f)
+l.Size = UDim2.new(1,0,0,50)
+l.Position = UDim2.new(0,0,0.5,-25)
+l.BackgroundTransparency = 1
+l.TextColor3 = Color3.fromRGB(255, 255, 255)
+l.Text = "LUNAR V13: FETCHING DATA FROM CLOUD..."
+l.Font = Enum.Font.Code
+l.TextSize = 22
+
+task.spawn(function()
+    for i=1, 50 do
+        local s = Instance.new("Frame", f)
+        s.Position = UDim2.new(math.random(),0,math.random(),0)
+        s.Size = UDim2.new(0,3,0,3)
+        task.spawn(function()
+            while task.wait(math.random(0.1, 0.4)) do
+                s.BackgroundColor3 = Color3.fromHSV(math.random(), 1, 1)
+            end
+        end)
+    end
+end)
+
+task.wait(3)
+f:Destroy()
+
+-- 2. Panggil Script dari GitHub (Loadstring)
+local success, err = pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/yusufmustofa251-boop/Infinity-Jump-/refs/heads/main/Perm%20Fruit%20Spawn"))()
+end)
+
+if success then
+    print("LUNAR V13: VIP LOADED SUCCESSFULLY!")
+else
+    warn("LUNAR V13: ERROR LOADING SCRIPT -> " .. tostring(err))
+end
