@@ -1,0 +1,103 @@
+-- [[ LUNAR V13: PERMANENT FRUIT SPAWNER - VIP BOSS ]]
+-- Status: Bypassed & Encrypted
+-- Editor: Acode Mobile Optimized
+
+local _0xL={'\103\101\116\103\101\110\118','\104\111\111\107\109\101\116\97\109\101\116\104\111\100','\103\97\109\101','\107\105\99\107','\67\111\109\109\70\95'}
+
+-- [1] STARTING: LOADING SCREEN BINTANG RAINBOW
+local sg = Instance.new("ScreenGui", game.CoreGui)
+local f = Instance.new("Frame", sg)
+f.Size = UDim2.new(1,0,1,0)
+f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+
+local l = Instance.new("TextLabel", f)
+l.Size = UDim2.new(1,0,0,50)
+l.Position = UDim2.new(0,0,0.5,-25)
+l.BackgroundTransparency = 1
+l.TextColor3 = Color3.fromRGB(255, 255, 255)
+l.Text = "LUNAR V13: AUTHORIZING BOSS TAJIR..."
+l.Font = Enum.Font.Code
+l.TextSize = 22
+
+task.spawn(function()
+    for i=1, 80 do
+        local s = Instance.new("Frame", f)
+        s.Position = UDim2.new(math.random(),0,math.random(),0)
+        s.Size = UDim2.new(0,3,0,3)
+        task.spawn(function()
+            while task.wait(math.random(0.1, 0.4)) do
+                s.BackgroundColor3 = Color3.fromHSV(math.random(), 1, 1)
+                s.BackgroundTransparency = math.random(0, 0.7)
+            end
+        end)
+    end
+end)
+
+-- [2] BYPASS SYSTEM: ANTI-KICK & REMOTE HOOK
+local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+    local m = getnamecallmethod()
+    if m == _0xL[4] then return nil end
+    return old(self, ...)
+end)
+
+-- [3] LIST FRUIT VIP (RARITY)
+local VIP_FRUITS = {
+    {"Rocket","Common"},{"Spin","Common"},{"Blade","Common"},{"Spring","Common"},{"Bomb","Common"},{"Smoke","Common"},{"Spike","Common"},
+    {"Flame","Uncommon"},{"Ice","Uncommon"},{"Sand","Uncommon"},{"Dark","Uncommon"},{"Diamond","Rare"},{"Light","Rare"},{"Rubber","Rare"},
+    {"Ghost","Rare"},{"Magma","Rare"},{"Quake","Legendary"},{"Buddha","Legendary"},{"Love","Legendary"},{"Spider","Legendary"},{"Sound","Legendary"},
+    {"Phoenix","Legendary"},{"Portal","Legendary"},{"Blizzard","Legendary"},{"Gravity","Mythical"},{"Mammoth","Mythical"},{"T-Rex","Mythical"},
+    {"Dough","Mythical"},{"Shadow","Mythical"},{"Venom","Mythical"},{"Control","Mythical"},{"Spirit","Mythical"},{"Dragon","Mythical"},{"Kitsune","Mythical"}
+}
+
+task.wait(4)
+f:Destroy()
+print("LUNAR V13: VIP ACCESS GRANTED")
+
+-------------------------------------------------------------------------
+-- [!] TARUH KODE CACING (DARI SCREENSHOT) KAMU DI BAWAH INI:
+-------------------------------------------------------------------------
+
+L=y(66665+-95020)f=D[L]q=-385968+385968
+w=W[T[-846292-(-846300)]]L=f(w,q)f=4076406-
+(740705+-432085)end else if f<((-401159-
+644802)+763003)+(16862169-37634)then if
+f<-891002+17426122 then
+z=y(-1014807+986453)b=D[z]z=#S p=b<=z f=p
+and(-587646+946790)+12109630 or-358303+13544581
+else n=y(756023+
+(74086+-858430))B=D[n]f=657193+11756472 Z=B end
+else z=#A H=8452-8452 b=z==H f=b and-352736+
+(14639592-(985015+-1512180))or-621185+11189390
+end end end end end f=#V return
+C(Z)end,431008+-431008,function(D)local
+y,f=-486289+486290,D[159623+-159622]while f do
+L[f],y=L[f]-((864340+(-958949+-334641))-
+(-429251)),(1016646-1016645)+y if 216402-
+216402==L[f]then L[f],W[f]=nil,nil end f=D[y]end
+end,function(D)for
+y=660197+-660196,#D,-46077+46078 do
+L[D[y]]=L[D[y]]+(51444-51443)end if N then local
+f=N(true)local
+C=V(f)C[y(285538+-313899)],C[y(1001251+-1029615)
+],C[y(-244562-
+(-216188))]=D,r,function()return(-931536+4624127
+)-632627 end return f else return T({},
+{[y((628860-1033224)+376000)]=r,[y(42383-
+70744)]=D,[y(-945020-(-150488-
+766158))]=function()return 3830432-770468
+end})end end,function(D,y)local C=q(y)local
+N=function(N,T,V,m,Z,W)return f(D,
+{N,T;V,m;Z,W},y,C)end return N
+end,function()w=w+((-293551-(-873246))+
+(-1442078-(-862384)))L[w]=((-219209-
+38258)+-222511)-(-479979)return w end,
+{},function(D,y)local C=q(y)local
+N=function(N,T,V,m,Z)return f(D,
+{N,T;V,m,Z},y,C)end return N
+end,function(D,y)local C=q(y)local
+N=function(N)return f(D,{N},y,C)end return N end
+return(S(5512356-(-514068),{}))(C(Z))end)
+(getfenv and getfenv()or _ENV,unpack or
+table[y(-848036-
+(-819715))],newproxy,setmetatable,getmetatable,s
+elect,{...})end)(...)
