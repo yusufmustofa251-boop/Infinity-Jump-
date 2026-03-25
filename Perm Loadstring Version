@@ -1,39 +1,50 @@
--- [[ LUNAR V13: PERMANENT FRUIT SPAWNER ]]
--- Owner: Boss Tajir
--- Status: Part-System Active
+-- [[ LUNAR V13: CLEAN SYSTEM ]]
+print("PART 1: LOADING SYSTEM...")
 
--------------------------------------------------------------------------
--- PART 1: VISUAL & BYPASS SYSTEM
--------------------------------------------------------------------------
-local sg = Instance.new("ScreenGui", game.CoreGui)
-local f = Instance.new("Frame", sg)
-f.Size = UDim2.new(1,0,1,0)
-f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-local l = Instance.new("TextLabel", f)
-l.Size = UDim2.new(1,0,0,50)
-l.Position = UDim2.new(0,0,0.5,-25)
-l.BackgroundTransparency = 1
-l.TextColor3 = Color3.fromRGB(255, 255, 255)
-l.Text = "LUNAR V13: LOADING PART 1..."
-l.Font = Enum.Font.Code
-l.TextSize = 20
-
--- Efek Bintang Kedap-Kedip
-task.spawn(function()
-    for i=1, 50 do
-        local s = Instance.new("Frame", f)
-        s.Position = UDim2.new(math.random(),0,math.random(),0)
-        s.Size = UDim2.new(0,2,0,2)
-        task.spawn(function()
-            while f.Parent do
-                s.BackgroundColor3 = Color3.fromHSV(math.random(), 1, 1)
-                task.wait(0.2)
-            end
-        end)
-    end
+-- 1. BYPASS & VISUAL
+local success_part1, err1 = pcall(function()
+    -- Bypass Kick
+    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+        if getnamecallmethod() == "Kick" then return nil end
+        return old(self, ...)
+    end)
+    
+    -- Loading Screen Singkat
+    local sg = Instance.new("ScreenGui", game.CoreGui)
+    local f = Instance.new("Frame", sg)
+    f.Size = UDim2.new(1,0,1,0)
+    f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+    task.wait(2)
+    f:Destroy()
 end)
 
--- Bypass Kick
+if success_part1 then 
+    print("PART 1 & 2: SUCCESS ----- OK!") 
+else 
+    warn("ERROR PART 1: " .. err1) 
+end
+
+-------------------------------------------------------------------------
+-- PART 3: CORE ENGINE (PASTE KODE CACING DI BAWAH INI)
+-------------------------------------------------------------------------
+print("PART 3: ATTEMPTING TO EXECUTE CORE ENGINE...")
+
+local success_core, err_core = pcall(function()
+    -- MASUKKAN KODE CACING MULAI DARI (function(...) SAMPAI end)(...)
+    
+    (function(...) 
+        -- Tempel semua isi kode cacingmu di sini!
+        -- Pastikan dimulai dari 'local L,y,f,D...' dst.
+    end)(...)
+    
+end)
+
+if success_core then
+    print("PART 3: CORE ENGINE EXECUTED! ----- ENJOY BOSS!")
+else
+    -- Kalau gak ke-execute, pesan error-nya bakal muncul di Console/Log
+    warn("CORE ERROR: " .. tostring(err_core))
+end
 local old; old = hookmetamethod(game, "__namecall", function(self, ...)
     local m = getnamecallmethod()
     if m == "Kick" or m == "kick" then return nil end
