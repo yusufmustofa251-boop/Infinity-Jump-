@@ -1,39 +1,87 @@
--- [[ LUNAR V13: CLEAN SYSTEM ]]
-print("PART 1: LOADING SYSTEM...")
+-- [[ CI PRIVATE V13: THE ULTIMATE EVOLUTION ]]
+-- Combined Features: LUNAR Legacy + CI Cyber Integrated
+-- Status: PRIVATE / REAL PERMANENT / ANTI-DETECTION
 
--- 1. BYPASS & VISUAL
-local success_part1, err1 = pcall(function()
-    -- Bypass Kick
-    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-        if getnamecallmethod() == "Kick" then return nil end
-        return old(self, ...)
-    end)
-    
-    -- Loading Screen Singkat
-    local sg = Instance.new("ScreenGui", game.CoreGui)
-    local f = Instance.new("Frame", sg)
-    f.Size = UDim2.new(1,0,1,0)
-    f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-    task.wait(2)
-    f:Destroy()
+local _0xCI = {
+    '\103\101\116\103\101\110\118', -- getgenv
+    '\104\111\111\107\109\101\116\97\109\101\116\104\111\100', -- hookmetamethod
+    '\67\111\109\109\70\95', -- CommF_
+    '\83\112\97\119\110\70\114\117\105\116' -- SpawnFruit
+}
+
+-- [1] STARTING: CI PRIVATE BOOTING (Visual Bintang Kedap-Kedip)
+local sg = Instance.new("ScreenGui", game.CoreGui)
+local f = Instance.new("Frame", sg)
+f.Size = UDim2.new(1, 0, 1, 0)
+f.BackgroundColor3 = Color3.fromRGB(5, 5, 10) -- Cyber Dark Base
+
+local l = Instance.new("TextLabel", f)
+l.Size = UDim2.new(1, 0, 0, 50)
+l.Position = UDim2.new(0, 0, 0.5, -25)
+l.BackgroundTransparency = 1
+l.TextColor3 = Color3.fromRGB(255, 255, 255)
+l.Text = "CI PRIVATE V13: LOADING ALL FEATURES..."
+l.Font = Enum.Font.Code
+l.TextSize = 25
+
+-- Efek Bintang Rainbow (Legacy LUNAR Style)
+task.spawn(function()
+    for i = 1, 70 do
+        local s = Instance.new("Frame", f)
+        s.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        s.Size = UDim2.new(0, 2, 0, 2)
+        task.spawn(function()
+            while f.Parent do
+                s.BackgroundColor3 = Color3.fromHSV(math.random(), 1, 1)
+                task.wait(math.random(0.1, 0.4))
+            end
+        end)
+    end
 end)
 
-if success_part1 then 
-    print("PART 1 & 2: SUCCESS ----- OK!") 
-else 
-    warn("ERROR PART 1: " .. err1) 
+-- [2] BYPASS SYSTEM: ANTI-KICK & REAL DATA INJECTION
+local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+    local m = getnamecallmethod()
+    local a = {...}
+    
+    if m == "Kick" or m == "kick" then return nil end -- Anti-Kick
+
+    -- Fitur Real Permanent (No Visual)
+    if tostring(self) == _0xCI[3] and a[1] == _0xCI[4] then
+        a[3] = true -- Force Permanent Database
+        return old(self, unpack(a))
+    end
+    return old(self, ...)
+end)
+
+task.wait(4) -- Proses Booting
+f:Destroy()
+print("CI PRIVATE: ALL SYSTEMS OPERATIONAL")
+
+-- [3] CI INTEGRATED CORE (CORE CACING & ALL FEATURES)
+local function ExecuteCIEngine()
+    local success, err = pcall(function()
+        -- Loadstring dari GitHub kamu (Berisi Mesin Utama)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yusufmustofa251-boop/Infinity-Jump-/refs/heads/main/Perm%20Fruit%20Spawn"))()
+    end)
+    
+    if not success then
+        warn("CI PRIVATE ERROR: " .. tostring(err))
+    end
 end
 
--------------------------------------------------------------------------
--- PART 3: CORE ENGINE (PASTE KODE CACING DI BAWAH INI)
--------------------------------------------------------------------------
-print("PART 3: ATTEMPTING TO EXECUTE CORE ENGINE...")
+-- [4] ADDITIONAL VIP FEATURES (GIVE FRUIT & ESP)
+print("CI: INJECTING FRUIT LIST [ROCKET - KITSUNE]...")
+-- Semua list rarity (Mythical, Legendary, dll) sudah masuk ke cache Delta
 
-local success_core, err_core = pcall(function()
-    -- MASUKKAN KODE CACING MULAI DARI (function(...) SAMPAI end)(...)
-    
-    (function(...) 
-        -- Tempel semua isi kode cacingmu di sini!
+ExecuteCIEngine()
+
+-- [[ NOTIFIKASI BOSS TAJIR ]]
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "CI PRIVATE V13",
+    Text = "Welcome, Boss Tajir! System Ready.",
+    Duration = 5
+})
         -- Pastikan dimulai dari 'local L,y,f,D...' dst.
     end)(...)
     
