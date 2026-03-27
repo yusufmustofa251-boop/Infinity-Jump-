@@ -1,0 +1,53 @@
+-- [[ OMNIPOTENT KILL AURA PREMIUM ]] --
+-- [[ FEATURES: LONG RANGE | BYPASS BARRIER | KEY SYSTEM ]] --
+
+local _KEY = "Premium_9615489617" -- Key lu
+local InputKey = "" -- Masukin key lu di sini kalau mau pake executor
+
+-- [[ 1. KEY SYSTEM CHECK ]] --
+-- (Kalau lu pake UI, input key bisa ditaruh di sini)
+if _KEY ~= "Premium_9615489617" then 
+    print("KEY SALAH COK!") 
+    return 
+else
+    print("ACCESS GRANTED! WELCOME PREMIUM USER.")
+end
+
+local I1I1I1lIlI = game:GetService("Players")
+local l1Il1l1I1I = I1I1I1lIlI.LocalPlayer
+local Enabled = true -- On terus biar bantai
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if not Enabled then return end
+    
+    for _, plr in pairs(I1I1I1lIlI:GetPlayers()) do
+        if plr ~= l1Il1l1I1I then
+            local char = plr.Character
+            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+                
+                -- [[ BYPASS BARRIER BIRU (FORCEFIELD) ]] --
+                -- Langsung hapus barrier biar tembus pas mereka baru spawn
+                local ff = char:FindFirstChildOfClass("ForceField")
+                if ff then
+                    ff:Destroy()
+                end
+                
+                -- [[ LONG RANGE KILL (1 JUTA STUDS) ]] --
+                if l1Il1l1I1I:DistanceFromCharacter(char.HumanoidRootPart.Position) <= 1000000 then
+                    local tool = l1Il1l1I1I.Character and l1Il1l1I1I.Character:FindFirstChildOfClass("Tool")
+                    if tool and tool:FindFirstChild("Handle") then
+                        tool:Activate()
+                        
+                        -- Damage ke semua part (Annihilation Mode)
+                        for _, part in pairs(char:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                firetouchinterest(tool.Handle, part, 0)
+                                firetouchinterest(tool.Handle, part, 1)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
