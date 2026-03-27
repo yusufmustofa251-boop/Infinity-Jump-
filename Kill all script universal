@@ -1,0 +1,47 @@
+local I1I1I1I1I1 = game:GetService("\83\116\97\114\116\101\114\71\117\105")
+local I1I1I1lIlI = game:GetService("\80\108\97\121\101\114\115")
+local l1Il1l1I1I = I1I1I1lIlI.LocalPlayer
+local Il1I1IlIlI = l1Il1l1I1I:WaitForChild("PlayerGui")
+
+-- [[ FITUR TAMBAHAN: AUTO-RESPAWN BYPASS ]] --
+-- Lu mati? Langsung idup lagi tanpa nunggu 5 detik!
+l1Il1l1I1I.CharacterAppearanceLoaded:Connect(function(char)
+    char:WaitForChild("Humanoid").Died:Connect(function()
+        print("EX: Dead? Re-spawning Instantly...")
+        I1I1I1lIlI.LocalPlayer.Character:Destroy()
+        -- Maksa server spawn ulang
+    end)
+end)
+
+-- [[ LOGIC KILL ALL LU (VARIABEL TETEP SAMA) ]] --
+game:GetService("RunService").RenderStepped:Connect(function()
+	if not Enabled then return end
+	for _, plr in pairs(I1I1I1lIlI:GetPlayers()) do
+		if plr ~= l1Il1l1I1I then
+			local char = plr.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and char.Humanoid.Health > 0 then
+				
+                -- [[ BYPASS FORCEFIELD (AURA BIRU) ]] --
+                -- Kita hapus ForceField musuh biar Kill-nya GAK VISUAL
+                local ff = char:FindFirstChildOfClass("ForceField")
+                if ff then ff:Destroy() end 
+
+				if l1Il1l1I1I:DistanceFromCharacter(char.HumanoidRootPart.Position) <= 1000000 then
+					local tool = l1Il1l1I1I.Character and l1Il1l1I1I.Character:FindFirstChildOfClass("Tool")
+					if tool and tool:FindFirstChild("Handle") then
+						tool:Activate()
+						for _, part in pairs(char:GetChildren()) do
+							if part:IsA("BasePart") then
+                                -- Kirim 5x hit per frame biar pasti MATI BENERAN
+                                for i = 1, 5 do
+								    firetouchinterest(tool.Handle, part, 0)
+								    firetouchinterest(tool.Handle, part, 1)
+                                end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
