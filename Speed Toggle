@@ -7,56 +7,69 @@ local noclip = false
 local toggleKey = Enum.KeyCode.E
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "NoclipSpeedGui"
+screenGui.Name = "SpeedNoclipGui"
 pcall(function()
     screenGui.Parent = game:GetService("CoreGui")
 end)
 
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 150, 0, 100)
-mainFrame.Position = UDim2.new(0.5, -75, 0.1, 0)
+mainFrame.Size = UDim2.new(0, 160, 0, 110)
+mainFrame.Position = UDim2.new(0.5, -80, 0.1, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
 
-local noclipLabel = Instance.new("TextLabel", mainFrame)
-noclipLabel.Size = UDim2.new(1, 0, 0, 40)
-noclipLabel.BackgroundTransparency = 1
-noclipLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipLabel.Font = Enum.Font.Code
-noclipLabel.TextSize = 18
-noclipLabel.Text = "Noclip: OFF"
+local statusLabel = Instance.new("TextLabel", mainFrame)
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.Code
+statusLabel.TextSize = 16
+statusLabel.Text = "Noclip: OFF"
+
+local speedLabel = Instance.new("TextLabel", mainFrame)
+speedLabel.Size = UDim2.new(1, 0, 0, 30)
+speedLabel.Position = UDim2.new(0, 0, 0.25, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.Font = Enum.Font.Code
+speedLabel.TextSize = 16
+speedLabel.Text = "Speed: OFF"
 
 local speedInput = Instance.new("TextBox", mainFrame)
-speedInput.Size = UDim2.new(0.8, 0, 0, 35)
-speedInput.Position = UDim2.new(0.1, 0, 0.5, 0)
+speedInput.Size = UDim2.new(0.8, 0, 0, 30)
+speedInput.Position = UDim2.new(0.1, 0, 0.6, 0)
 speedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedInput.Font = Enum.Font.Code
-speedInput.TextSize = 16
+speedInput.TextSize = 14
 speedInput.Text = "16"
-speedInput.PlaceholderText = "Speed..."
+speedInput.PlaceholderText = "Set Speed (0-1000)"
 
-local function toggleNoclip()
-    noclip = not noclip
-    noclipLabel.Text = noclip and "Noclip: ON" or "Noclip: OFF"
+local function updateSpeedLabel(val)
+    if val > 16 then
+        speedLabel.Text = "Speed: ON"
+    else
+        speedLabel.Text = "Speed: OFF"
+    end
 end
 
-speedInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
+speedInput.FocusLost:Connect(function(enter)
+    if enter then
         local val = tonumber(speedInput.Text)
         if val then
             val = math.clamp(val, 0, 1000)
             speedInput.Text = tostring(val)
-            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                Player.Character.Humanoid.WalkSpeed = val
-            end
+            updateSpeedLabel(val)
         end
     end
 end)
 
 UserInputService.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == toggleKey then
-        toggleNoclip()
+        noclip = not noclip
+        statusLabel.Text = noclip and "Noclip: ON" or "Noclip: OFF"
     end
 end)
 
@@ -68,10 +81,9 @@ RunService.Stepped:Connect(function()
             end
         end
     end
+    
     if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        local currentSpeed = tonumber(speedInput.Text) or 16
-        if Player.Character.Humanoid.WalkSpeed ~= currentSpeed then
-            Player.Character.Humanoid.WalkSpeed = currentSpeed
-        end
+        local targetSpeed = tonumber(speedInput.Text) or 16
+        Player.Character.Humanoid.WalkSpeed = targetSpeed
     end
 end)
