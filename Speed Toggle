@@ -1,0 +1,77 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Player = Players.LocalPlayer
+
+local noclip = false
+local toggleKey = Enum.KeyCode.E
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NoclipSpeedGui"
+pcall(function()
+    screenGui.Parent = game:GetService("CoreGui")
+end)
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 150, 0, 100)
+mainFrame.Position = UDim2.new(0.5, -75, 0.1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+mainFrame.BorderSizePixel = 0
+
+local noclipLabel = Instance.new("TextLabel", mainFrame)
+noclipLabel.Size = UDim2.new(1, 0, 0, 40)
+noclipLabel.BackgroundTransparency = 1
+noclipLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipLabel.Font = Enum.Font.Code
+noclipLabel.TextSize = 18
+noclipLabel.Text = "Noclip: OFF"
+
+local speedInput = Instance.new("TextBox", mainFrame)
+speedInput.Size = UDim2.new(0.8, 0, 0, 35)
+speedInput.Position = UDim2.new(0.1, 0, 0.5, 0)
+speedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.Font = Enum.Font.Code
+speedInput.TextSize = 16
+speedInput.Text = "16"
+speedInput.PlaceholderText = "Speed..."
+
+local function toggleNoclip()
+    noclip = not noclip
+    noclipLabel.Text = noclip and "Noclip: ON" or "Noclip: OFF"
+end
+
+speedInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local val = tonumber(speedInput.Text)
+        if val then
+            val = math.clamp(val, 0, 1000)
+            speedInput.Text = tostring(val)
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = val
+            end
+        end
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == toggleKey then
+        toggleNoclip()
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if noclip and Player.Character then
+        for _, part in pairs(Player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        local currentSpeed = tonumber(speedInput.Text) or 16
+        if Player.Character.Humanoid.WalkSpeed ~= currentSpeed then
+            Player.Character.Humanoid.WalkSpeed = currentSpeed
+        end
+    end
+end)
