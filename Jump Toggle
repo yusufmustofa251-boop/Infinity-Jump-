@@ -1,0 +1,57 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JumpOnlyGui"
+pcall(function() screenGui.Parent = game:GetService("CoreGui") end)
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 150, 0, 80)
+mainFrame.Position = UDim2.new(0.5, -75, 0.1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+local statusLabel = Instance.new("TextLabel", mainFrame)
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.Code
+statusLabel.TextSize = 16
+statusLabel.Text = "Jump: OFF"
+
+local jumpInput = Instance.new("TextBox", mainFrame)
+jumpInput.Size = UDim2.new(0.8, 0, 0, 30)
+jumpInput.Position = UDim2.new(0.1, 0, 0.5, 0)
+jumpInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+jumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpInput.Font = Enum.Font.Code
+jumpInput.TextSize = 14
+jumpInput.Text = "50"
+jumpInput.PlaceholderText = "Jump (0-1000)"
+
+jumpInput.FocusLost:Connect(function(enter)
+    if enter then
+        local val = tonumber(jumpInput.Text)
+        if val then
+            val = math.clamp(val, 0, 1000)
+            jumpInput.Text = tostring(val)
+            if val > 50 then
+                statusLabel.Text = "Jump: ON"
+            else
+                statusLabel.Text = "Jump: OFF"
+            end
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        local hum = Player.Character.Humanoid
+        local jumpVal = tonumber(jumpInput.Text) or 50
+        hum.UseJumpPower = true
+        hum.JumpPower = jumpVal
+    end
+end)
