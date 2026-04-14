@@ -1,0 +1,52 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Player = Players.LocalPlayer
+
+local noclip = false
+local toggleKey = Enum.KeyCode.E
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NoclipStatus"
+pcall(function()
+    screenGui.Parent = game:GetService("CoreGui")
+end)
+
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 120, 0, 40)
+frame.Position = UDim2.new(0.5, -60, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+frame.BorderSizePixel = 0
+
+local label = Instance.new("TextLabel", frame)
+label.Size = UDim2.new(1, 0, 1, 0)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.Font = Enum.Font.Code
+label.TextSize = 18
+label.Text = "Noclip: OFF"
+
+local function toggleNoclip()
+    noclip = not noclip
+    if noclip then
+        label.Text = "Noclip: ON"
+    else
+        label.Text = "Noclip: OFF"
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == toggleKey then
+        toggleNoclip()
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if noclip and Player.Character then
+        for _, part in pairs(Player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
